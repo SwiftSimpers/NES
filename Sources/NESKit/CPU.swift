@@ -34,6 +34,36 @@ struct CPU6502 {
         ]
         PC = 0
     }
+    
+    /**
+     Replaces register A to the parameter value.
+     - parameters:
+        - value: The 8 bit replacement value.
+     - returns: The replacement value.
+     */
+    public mutating func LDA(value: UInt8) -> UInt8 {
+        self[.A] = value
+        return self[.A]
+    }
+    
+    /**
+     Updates the status register based on the result.
+     - parameters:
+        - result: Result value of the execution.
+     */
+    public mutating func updateStatus(result: UInt8) {
+        if result == 0x00 {
+            self[.P] |= 0b0000_0010
+        } else {
+            self[.P] &= 0b1111_1101
+        }
+
+        if result & 0x80 != 0 {
+            self[.P] |= 0b1000_0000
+        } else {
+            self[.P] &= 0b0111_1111
+        }
+    }
 
     /**
      Interprets the program passed by the argument.
@@ -50,27 +80,13 @@ struct CPU6502 {
             switch opcode {
             case 0x00:
                 // BRK
-                break
-            case 0xA9:
                 return
             case 0xa9:
                 // LDA #$nn (immediate)
                 let param = program[Int(PC)]
                 PC += 1
-                self[.A] = param
-
-                if param == 0x00 {
-                    self[.P] |= 0x20
-                } else {
-                    self[.P] &= 0xDF
-                }
-
-                if param < 0x80 {
-                    self[.P] |= 0x80
-                } else {
-                    self[.P] &= 0x7F
-                }
-
+                let result = LDA(value: param)
+                updateStatus(result: result)
             default:
                 // TODO: implement opcodes
                 break
