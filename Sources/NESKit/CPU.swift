@@ -52,6 +52,8 @@ struct CPU6502 {
                 // BRK
                 break
             case 0xA9:
+                return
+            case 0xa9:
                 // LDA #$nn (immediate)
                 let param = program[Int(PC)]
                 PC += 1
