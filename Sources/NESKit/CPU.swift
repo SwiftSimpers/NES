@@ -6,6 +6,12 @@ struct CPU6502 {
     var registers: [RegisterKeys: UInt8] = [:]
     var PC: UInt16 = 0
 
+    /**
+     Gets register by register key.
+     - parameters:
+        - register: Register key you want to get the value.
+     - returns: Register value matches with the key.
+     */
     subscript(register: RegisterKeys) -> UInt8 {
         get {
             return registers[register] ?? 0
@@ -15,6 +21,9 @@ struct CPU6502 {
         }
     }
 
+    /**
+     Resets all the registers.
+     */
     public mutating func reset() {
         registers = [
             .A: 0,
@@ -26,6 +35,12 @@ struct CPU6502 {
         PC = 0
     }
 
+    /**
+     Interprets the program passed by the argument.
+     Check the P register to check the status of CPU.
+     - parameters:
+        - program: Program code in 6502 machine language.
+     */
     public mutating func interpret(program: [UInt8]) {
         reset()
         while true {
