@@ -47,6 +47,24 @@ struct CPU6502 {
     }
     
     /**
+     Replaces register X to register A value.
+     - returns: The replacement(register A) value.
+     */
+    public mutating func TAX() -> UInt8 {
+        self[.X] = self[.A]
+        return self[.X]
+    }
+    
+    /**
+     Increaces register X value by 1.
+     - returns: The increased register X value.
+     */
+    public mutating func INX() -> UInt8 {
+        self[.X] &+= 1
+        return self[.X]
+    }
+    
+    /**
      Updates the status register based on the result.
      - parameters:
         - result: Result value of the execution.
@@ -87,6 +105,12 @@ struct CPU6502 {
                 PC += 1
                 let result = LDA(value: param)
                 updateStatus(result: result)
+            case 0xaa:
+                let result = TAX()
+                updateStatus(result: result)
+            case 0xe8:
+                let result = INX()
+                updateStatus(result: result)
             default:
                 // TODO: implement opcodes
                 break
@@ -94,4 +118,3 @@ struct CPU6502 {
         }
     }
 }
-
