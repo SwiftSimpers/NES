@@ -9,14 +9,6 @@ struct CPU6502 {
     subscript(register: RegisterKeys) -> UInt8 {
         get {
             return registers[register] ?? 0
-            // helloyunho
-            // i gtg
-            // wait what
-            // hmm wut
-            // git push it
-            // okay
-            // where
-            // swiftsimpers
         }
         set(value) {
             registers[register] = value
@@ -49,12 +41,6 @@ struct CPU6502 {
                 let param = program[Int(PC)]
                 PC += 1
                 self[.A] = param
-                // does swift have match statements?
-                // nope
-                // switch case looks ugly
-                // hmm i mean this is the most beautiful statement for this in swift
-                // hmmm
-                // also forgor to change spacing
 
                 if param == 0x00 {
                     self[.P] |= 0x20
