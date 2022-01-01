@@ -4,7 +4,19 @@ struct CPU6502 {
     }
 
     var registers: [RegisterKeys: UInt8] = [:]
-    var PC: UInt16 = 0
+    private var _PC: UInt16 = 0
+    var PC: UInt16 {
+        get {
+            return _PC
+        }
+        set(value) {
+            if value > UInt16.max {
+                _PC = value - UInt16.max
+            } else {
+                _PC = value
+            }
+        }
+    }
 
     /**
      Gets register by register key.
@@ -17,7 +29,11 @@ struct CPU6502 {
             return registers[register] ?? 0
         }
         set(value) {
-            registers[register] = value
+            if value > UInt8.max {
+                registers[register] = value - UInt8.max
+            } else {
+                registers[register] = value
+            }
         }
     }
 
@@ -93,7 +109,7 @@ struct CPU6502 {
         reset()
         while true {
             let opcode = program[Int(PC)]
-            PC += 1
+            PC &+= 1
 
             switch opcode {
             case 0x00:
