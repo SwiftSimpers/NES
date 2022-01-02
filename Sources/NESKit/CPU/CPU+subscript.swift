@@ -35,10 +35,10 @@ public extension CPU6502 {
      */
     subscript(index: Int) -> UInt8 {
         get {
-            return allocs[index]
+            return memory[index]
         }
         set(value) {
-            allocs[index] = value
+            memory[index] = value
         }
     }
 
@@ -50,10 +50,10 @@ public extension CPU6502 {
      */
     subscript(index: UInt16) -> UInt8 {
         get {
-            return allocs[Int(index)]
+            return memory[Int(index)]
         }
         set(value) {
-            allocs[Int(index)] = value
+            memory[Int(index)] = value
         }
     }
 
@@ -63,42 +63,12 @@ public extension CPU6502 {
         - bounds: Index range of the parts you want to get.
      - returns: Allocated values in the parameter range.
      */
-    subscript(bounds: Range<Int>) -> ArraySlice<UInt8> {
+    subscript<R>(rangeExpression: R) -> Data where R: RangeExpression, R.Bound: FixedWidthInteger {
         get {
-            return allocs[bounds]
+            return memory[rangeExpression]
         }
         set(value) {
-            allocs[bounds] = value
-        }
-    }
-
-    /**
-     Gets all allocated values in the provided range.
-     - parameters:
-        - bounds: Index range of the parts you want to get.
-     - returns: Allocated values in the parameter range.
-     */
-    subscript(bounds: Range<UInt16>) -> ArraySlice<UInt8> {
-        get {
-            return allocs[Int(bounds.lowerBound) ... Int(bounds.upperBound)]
-        }
-        set(value) {
-            allocs[Int(bounds.lowerBound) ... Int(bounds.upperBound)] = value
-        }
-    }
-
-    /**
-     Gets all allocated values in the provided range.
-     - parameters:
-        - r: Index range of the parts you want to get.
-     - returns: Allocated values in the parameter range.
-     */
-    subscript<R>(r: R) -> ArraySlice<UInt8> where R: RangeExpression, Int == R.Bound {
-        get {
-            return allocs[r]
-        }
-        set(value) {
-            allocs[r] = value
+            memory[rangeExpression] = value
         }
     }
 }

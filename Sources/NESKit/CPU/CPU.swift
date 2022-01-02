@@ -1,10 +1,12 @@
+import Foundation
+
 public struct CPU6502 {
     public enum RegisterKeys: String {
         case A, X, Y, S, P
     }
 
     internal var registers: [RegisterKeys: UInt8] = [:]
-    internal var allocs: [UInt8] = Array(repeating: 0, count: 0xFFFF)
+    internal var memory: Memory = .init()
     private var _PC: UInt16 = 0
     // Separated since PC needs 16 bits.
     /// Program counter register.
@@ -37,13 +39,13 @@ public struct CPU6502 {
             return UInt16(self[PC &- 1] &+ self[.Y])
         case .abs:
             PC &+= 2
-            return readAllocU16(index: PC &- 2)
+            return memory.readAllocU16(index: PC &- 2)
         case .absX:
             PC &+= 2
-            return readAllocU16(index: PC &- 2) &+ UInt16(self[.X])
+            return memory.readAllocU16(index: PC &- 2) &+ UInt16(self[.X])
         case .absY:
             PC &+= 2
-            return readAllocU16(index: PC &- 2) &+ UInt16(self[.Y])
+            return memory.readAllocU16(index: PC &- 2) &+ UInt16(self[.Y])
         case .indirectX:
             PC &+= 1
             let base = self[PC &- 1]
@@ -70,7 +72,7 @@ public struct CPU6502 {
             .S: 0,
             .P: 0,
         ]
-        PC = readAllocU16(index: 0xFFFC)
+        PC = memory.readAllocU16(index: 0xFFFC)
     }
 
     /**
@@ -79,13 +81,15 @@ public struct CPU6502 {
         - result: Result value of the execution.
      */
     public mutating func updateStatus(result: UInt8) {
-        if result == 0x00 {
+        // Flags
+        // N V * B D I Z C
+        if result == 0b0000_0000 {
             self[.P] |= 0b0000_0010
         } else {
             self[.P] &= 0b1111_1101
         }
 
-        if result & 0x80 != 0 {
+        if result & 0b1000_0000 != 0 {
             self[.P] |= 0b1000_0000
         } else {
             self[.P] &= 0b0111_1111
@@ -186,7 +190,7 @@ public struct CPU6502 {
         - program: Program code in 6502 machine language.
      */
     public mutating func loadAndRun(program: [UInt8]) {
-        load(program: program)
+        memory.load(program: program)
         run()
     }
 }
