@@ -4,7 +4,7 @@ struct CPU6502 {
     }
 
     internal var registers: [RegisterKeys: UInt8] = [:]
-    internal var allocs: [UInt8] = Array(repeating: 0, count:0xffff)
+    internal var allocs: [UInt8] = Array(repeating: 0, count: 0xffff)
     private var _PC: UInt16 = 0
     // Separated since PC needs 16 bits.
     /// Program counter register.
@@ -20,7 +20,7 @@ struct CPU6502 {
             }
         }
     }
-    
+
     internal mutating func getAddress(mode: AddressingModes) -> UInt16 {
         switch mode {
         case .immidiate:
@@ -70,9 +70,9 @@ struct CPU6502 {
             .S: 0,
             .P: 0,
         ]
-        PC = readAllocU16(index: 0xFFFC)
+        PC = readAllocU16(index: 0xfffc)
     }
-    
+
     /**
      Updates the status register based on the result.
      - parameters:
@@ -106,6 +106,7 @@ struct CPU6502 {
             case 0x00:
                 // BRK
                 return
+
             case 0xa9:
                 // LDA (immidate)
                 let result = LDA(mode: .immidiate)
@@ -138,26 +139,54 @@ struct CPU6502 {
                 // LDA (indirect y)
                 let result = LDA(mode: .indirectY)
                 updateStatus(result: result)
+
             case 0xaa:
+                // TAX
                 let result = TAX()
                 updateStatus(result: result)
+
             case 0xe8:
+                // INX
                 let result = INX()
                 updateStatus(result: result)
+
+            case 0x85:
+                // STA (zero page)
+                let result = STA(mode: .zero)
+                updateStatus(result: result)
+            case 0x95:
+                let result = STA(mode: .zeroX)
+                updateStatus(result: result)
+            case 0x8d:
+                let result = STA(mode: .abs)
+                updateStatus(result: result)
+            case 0x9d:
+                let result = STA(mode: .absX)
+                updateStatus(result: result)
+            case 0x99:
+                let result = STA(mode: .absY)
+                updateStatus(result: result)
+            case 0x81:
+                let result = STA(mode: .indirectX)
+                updateStatus(result: result)
+            case 0x91:
+                let result = STA(mode: .indirectY)
+                updateStatus(result: result)
+
             default:
                 // TODO: implement opcodes
                 break
             }
         }
     }
-    
+
     /**
      Allocates the program into CPU and executes the program.
      - parameters:
         - program: Program code in 6502 machine language.
      */
     public mutating func loadAndRun(program: [UInt8]) {
-        self.load(program: program)
-        self.run()
+        load(program: program)
+        run()
     }
 }

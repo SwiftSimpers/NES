@@ -1,41 +1,53 @@
 //
 //  CPU+Instructions.swift
-//  
+//
 //
 //  Created by Helloyunho on 2022/01/02.
 //
 
 import Foundation
 
-extension CPU6502 {
+public extension CPU6502 {
     /**
-     Replaces register A to the parameter value.
+     Replaces register A to the provided address.
      - parameters:
-        - value: The 8 bit replacement value.
+        - mode: Addressing mode to set where and how it should grab address.
      - returns: The replacement value.
      */
-    public mutating func LDA(mode: AddressingModes) -> UInt8 {
+    mutating func LDA(mode: AddressingModes) -> UInt8 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.A] = value
         return self[.A]
     }
-    
+
     /**
      Replaces register X to register A value.
      - returns: The replacement(register A) value.
      */
-    public mutating func TAX() -> UInt8 {
+    mutating func TAX() -> UInt8 {
         self[.X] = self[.A]
         return self[.X]
     }
-    
+
     /**
      Increaces register X value by 1.
      - returns: The increased register X value.
      */
-    public mutating func INX() -> UInt8 {
+    mutating func INX() -> UInt8 {
         self[.X] &+= 1
         return self[.X]
+    }
+
+    /**
+     Copy register A value to the provided address.
+     - parameters:
+        - mode: Addressing mode to set where and how it should grab address.
+     - returns: The copied value.
+     */
+    mutating func STA(mode: AddressingModes) -> UInt8 {
+        let pointer = getAddress(mode: mode)
+        self[pointer] = self[.A]
+        return self[.A]
     }
 }

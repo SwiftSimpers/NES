@@ -40,4 +40,11 @@ final class CPUTests: XCTestCase {
         cpu.loadAndRun(program: [0xa9, 0xff, 0xaa, 0xe8, 0x00])
         XCTAssertEqual(cpu[.X], 0)
     }
+    
+    func testSDA() {
+        var cpu = CPU6502()
+        cpu[0x10] = 0x55
+        cpu.loadAndRun(program: [0xa5, 0x10, 0x85, 0x56, 0x00])
+        XCTAssertEqual(cpu[0x56], 0x55)
+    }
 }

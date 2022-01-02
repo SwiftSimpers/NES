@@ -1,6 +1,6 @@
 //
 //  CPU+subscript.swift
-//  
+//
 //
 //  Created by Helloyunho on 2022/01/02.
 //
@@ -93,7 +93,7 @@ extension CPU6502 {
         - r: Index range of the parts you want to get.
      - returns: Allocated values in the parameter range.
      */
-    subscript<R>(r: R) -> ArraySlice<UInt8> where R : RangeExpression, Int == R.Bound {
+    subscript<R>(r: R) -> ArraySlice<UInt8> where R: RangeExpression, Int == R.Bound {
         get {
             return allocs[r]
         }
