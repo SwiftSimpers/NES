@@ -18,6 +18,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.A] = value
+        updateStatus(result: value)
         return self[.A]
     }
 
@@ -27,6 +28,7 @@ public extension CPU6502 {
      */
     mutating func TAX() -> UInt8 {
         self[.X] = self[.A]
+        updateStatus(result: self[.X])
         return self[.X]
     }
 
@@ -36,6 +38,7 @@ public extension CPU6502 {
      */
     mutating func INX() -> UInt8 {
         self[.X] &+= 1
+        updateStatus(result: self[.X])
         return self[.X]
     }
 

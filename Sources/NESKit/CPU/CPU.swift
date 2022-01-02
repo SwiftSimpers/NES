@@ -80,7 +80,7 @@ public struct CPU6502 {
      - parameters:
         - result: Result value of the execution.
      */
-    public mutating func updateStatus(result: UInt8) {
+    public mutating func updateStatus(result: UInt8, overflow: Bool? = nil, carry: Bool? = nil) {
         // Flags
         // N V * B D I Z C
         if result == 0b0000_0000 {
@@ -93,6 +93,18 @@ public struct CPU6502 {
             self[.P] |= 0b1000_0000
         } else {
             self[.P] &= 0b0111_1111
+        }
+
+        if overflow ?? false {
+            self[.P] |= 0b0100_0000
+        } else {
+            self[.P] &= 0b1011_1111
+        }
+
+        if carry ?? false {
+            self[.P] |= 0b0000_0001
+        } else {
+            self[.P] &= 0b1111_1110
         }
     }
 
@@ -113,69 +125,65 @@ public struct CPU6502 {
 
             case 0xA9:
                 // LDA (immidate)
-                let result = LDA(mode: .immidiate)
-                updateStatus(result: result)
+                _ = LDA(mode: .immidiate)
+
             case 0xA5:
                 // LDA (zero page)
-                let result = LDA(mode: .zero)
-                updateStatus(result: result)
+                _ = LDA(mode: .zero)
+
             case 0xB5:
                 // LDA (zero page x)
-                let result = LDA(mode: .zeroX)
-                updateStatus(result: result)
+                _ = LDA(mode: .zeroX)
+
             case 0xAD:
                 // LDA (absolute)
-                let result = LDA(mode: .abs)
-                updateStatus(result: result)
+                _ = LDA(mode: .abs)
+
             case 0xBD:
                 // LDA (absolute x)
-                let result = LDA(mode: .absX)
-                updateStatus(result: result)
+                _ = LDA(mode: .absX)
+
             case 0xB9:
                 // LDA (absolute y)
-                let result = LDA(mode: .absY)
-                updateStatus(result: result)
+                _ = LDA(mode: .absY)
+
             case 0xA1:
                 // LDA (indirect x)
-                let result = LDA(mode: .indirectX)
-                updateStatus(result: result)
+                _ = LDA(mode: .indirectX)
+
             case 0xB1:
                 // LDA (indirect y)
-                let result = LDA(mode: .indirectY)
-                updateStatus(result: result)
+                _ = LDA(mode: .indirectY)
 
             case 0xAA:
                 // TAX
-                let result = TAX()
-                updateStatus(result: result)
+                _ = TAX()
 
             case 0xE8:
                 // INX
-                let result = INX()
-                updateStatus(result: result)
+                _ = INX()
 
             case 0x85:
                 // STA (zero page)
-                let result = STA(mode: .zero)
-                updateStatus(result: result)
+                _ = STA(mode: .zero)
             case 0x95:
-                let result = STA(mode: .zeroX)
-                updateStatus(result: result)
+                // STA (zero page x)
+                _ = STA(mode: .zeroX)
             case 0x8D:
-                let result = STA(mode: .abs)
-                updateStatus(result: result)
+                // STA (absolute)
+                _ = STA(mode: .abs)
             case 0x9D:
-                let result = STA(mode: .absX)
-                updateStatus(result: result)
+                // STA (absolute x)
+                _ = STA(mode: .absX)
             case 0x99:
-                let result = STA(mode: .absY)
-                updateStatus(result: result)
+                // STA (absolute y)
+                _ = STA(mode: .absY)
             case 0x81:
-                let result = STA(mode: .indirectX)
-                updateStatus(result: result)
+                // STA (indirect x)
+                _ = STA(mode: .indirectX)
             case 0x91:
-                let result = STA(mode: .indirectY)
-                updateStatus(result: result)
+                // STA (indirect y)
+                _ = STA(mode: .indirectY)
 
             default:
                 // TODO: implement opcodes
