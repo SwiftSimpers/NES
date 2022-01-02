@@ -7,6 +7,6 @@
 
 import Foundation
 
-enum AddressingModes {
+public enum AddressingModes {
     case immidiate, zero, zeroX, zeroY, abs, absX, absY, indirectX, indirectY
 }

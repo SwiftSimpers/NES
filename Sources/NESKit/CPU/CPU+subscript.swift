@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension CPU6502 {
+public extension CPU6502 {
     /**
      Gets register value by register key.
      - parameters:
@@ -26,7 +26,7 @@ extension CPU6502 {
             }
         }
     }
-    
+
     /**
      Gets allocated value by index.
      - parameters:
@@ -41,7 +41,7 @@ extension CPU6502 {
             allocs[index] = value
         }
     }
-    
+
     /**
      Gets allocated value by index.
      - parameters:
@@ -56,7 +56,7 @@ extension CPU6502 {
             allocs[Int(index)] = value
         }
     }
-    
+
     /**
      Gets all allocated values in the provided range.
      - parameters:
@@ -71,7 +71,7 @@ extension CPU6502 {
             allocs[bounds] = value
         }
     }
-    
+
     /**
      Gets all allocated values in the provided range.
      - parameters:
@@ -86,7 +86,7 @@ extension CPU6502 {
             allocs[Int(bounds.lowerBound) ... Int(bounds.upperBound)] = value
         }
     }
-    
+
     /**
      Gets all allocated values in the provided range.
      - parameters:

@@ -1,10 +1,10 @@
-struct CPU6502 {
+public struct CPU6502 {
     enum RegisterKeys: String {
         case A, X, Y, S, P
     }
 
     internal var registers: [RegisterKeys: UInt8] = [:]
-    internal var allocs: [UInt8] = Array(repeating: 0, count: 0xffff)
+    internal var allocs: [UInt8] = Array(repeating: 0, count: 0xFFFF)
     private var _PC: UInt16 = 0
     // Separated since PC needs 16 bits.
     /// Program counter register.
@@ -70,7 +70,7 @@ struct CPU6502 {
             .S: 0,
             .P: 0,
         ]
-        PC = readAllocU16(index: 0xfffc)
+        PC = readAllocU16(index: 0xFFFC)
     }
 
     /**
@@ -107,45 +107,45 @@ struct CPU6502 {
                 // BRK
                 return
 
-            case 0xa9:
+            case 0xA9:
                 // LDA (immidate)
                 let result = LDA(mode: .immidiate)
                 updateStatus(result: result)
-            case 0xa5:
+            case 0xA5:
                 // LDA (zero page)
                 let result = LDA(mode: .zero)
                 updateStatus(result: result)
-            case 0xb5:
+            case 0xB5:
                 // LDA (zero page x)
                 let result = LDA(mode: .zeroX)
                 updateStatus(result: result)
-            case 0xad:
+            case 0xAD:
                 // LDA (absolute)
                 let result = LDA(mode: .abs)
                 updateStatus(result: result)
-            case 0xbd:
+            case 0xBD:
                 // LDA (absolute x)
                 let result = LDA(mode: .absX)
                 updateStatus(result: result)
-            case 0xb9:
+            case 0xB9:
                 // LDA (absolute y)
                 let result = LDA(mode: .absY)
                 updateStatus(result: result)
-            case 0xa1:
+            case 0xA1:
                 // LDA (indirect x)
                 let result = LDA(mode: .indirectX)
                 updateStatus(result: result)
-            case 0xb1:
+            case 0xB1:
                 // LDA (indirect y)
                 let result = LDA(mode: .indirectY)
                 updateStatus(result: result)
 
-            case 0xaa:
+            case 0xAA:
                 // TAX
                 let result = TAX()
                 updateStatus(result: result)
 
-            case 0xe8:
+            case 0xE8:
                 // INX
                 let result = INX()
                 updateStatus(result: result)
@@ -157,10 +157,10 @@ struct CPU6502 {
             case 0x95:
                 let result = STA(mode: .zeroX)
                 updateStatus(result: result)
-            case 0x8d:
+            case 0x8D:
                 let result = STA(mode: .abs)
                 updateStatus(result: result)
-            case 0x9d:
+            case 0x9D:
                 let result = STA(mode: .absX)
                 updateStatus(result: result)
             case 0x99:
