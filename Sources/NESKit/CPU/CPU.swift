@@ -20,6 +20,44 @@ struct CPU6502 {
             }
         }
     }
+    
+    internal mutating func getAddress(mode: AddressingModes) -> UInt16 {
+        switch mode {
+        case .immidiate:
+            PC &+= 1
+            return PC &- 1
+        case .zero:
+            PC &+= 1
+            return UInt16(self[PC &- 1])
+        case .zeroX:
+            PC &+= 1
+            return UInt16(self[PC &- 1] &+ self[.X])
+        case .zeroY:
+            PC &+= 1
+            return UInt16(self[PC &- 1] &+ self[.Y])
+        case .abs:
+            PC &+= 2
+            return readAllocU16(index: PC &- 2)
+        case .absX:
+            PC &+= 2
+            return readAllocU16(index: PC &- 2) &+ UInt16(self[.X])
+        case .absY:
+            PC &+= 2
+            return readAllocU16(index: PC &- 2) &+ UInt16(self[.Y])
+        case .indirectX:
+            PC &+= 1
+            let base = self[PC &- 1]
+            let pointer = base &+ self[.X]
+            let bytes = [self[UInt16(pointer)], self[UInt16(pointer &+ 1)]]
+            return bytes.withUnsafeBytes { $0.load(as: UInt16.self) }
+        case .indirectY:
+            PC &+= 1
+            let base = self[PC &- 1]
+            let pointer = base
+            let bytes = [self[UInt16(pointer)], self[UInt16(pointer &+ 1)]]
+            return bytes.withUnsafeBytes { $0.load(as: UInt16.self) } &+ UInt16(self[.Y])
+        }
+    }
 
     /**
      Resets all the registers.
@@ -61,7 +99,7 @@ struct CPU6502 {
     public mutating func run() {
         reset()
         while true {
-            let opcode = self[Int(PC)]
+            let opcode = self[PC]
             PC &+= 1
 
             switch opcode {
@@ -69,10 +107,36 @@ struct CPU6502 {
                 // BRK
                 return
             case 0xa9:
-                // LDA #$nn (immediate)
-                let param = self[Int(PC)]
-                PC &+= 1
-                let result = LDA(value: param)
+                // LDA (immidate)
+                let result = LDA(mode: .immidiate)
+                updateStatus(result: result)
+            case 0xa5:
+                // LDA (zero page)
+                let result = LDA(mode: .zero)
+                updateStatus(result: result)
+            case 0xb5:
+                // LDA (zero page x)
+                let result = LDA(mode: .zeroX)
+                updateStatus(result: result)
+            case 0xad:
+                // LDA (absolute)
+                let result = LDA(mode: .abs)
+                updateStatus(result: result)
+            case 0xbd:
+                // LDA (absolute x)
+                let result = LDA(mode: .absX)
+                updateStatus(result: result)
+            case 0xb9:
+                // LDA (absolute y)
+                let result = LDA(mode: .absY)
+                updateStatus(result: result)
+            case 0xa1:
+                // LDA (indirect x)
+                let result = LDA(mode: .indirectX)
+                updateStatus(result: result)
+            case 0xb1:
+                // LDA (indirect y)
+                let result = LDA(mode: .indirectY)
                 updateStatus(result: result)
             case 0xaa:
                 let result = TAX()

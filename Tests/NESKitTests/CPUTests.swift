@@ -16,6 +16,13 @@ final class CPUTests: XCTestCase {
         XCTAssertTrue(cpu[.P] & 0x2 == 2)
     }
     
+    func testLDAFromMemory() {
+        var cpu = CPU6502()
+        cpu[0x10] = 0x55
+        cpu.loadAndRun(program: [0xa5, 0x10, 0x00])
+        XCTAssertEqual(cpu[.A], 0x55)
+    }
+    
     func testTAX() {
         var cpu = CPU6502()
         cpu.loadAndRun(program: [0xa9, 0x05, 0xaa, 0x00])

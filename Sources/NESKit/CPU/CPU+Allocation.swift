@@ -23,11 +23,12 @@ extension CPU6502 {
      - parameters:
         - index: Index value you want to start from.
      */
-    public func readAllocU16(index: Int) -> UInt16 {
+    public func readAllocU16(index: UInt16) -> UInt16 {
         // Somehow UInt16 by default reads bytes in little endian order
         // So we don't have to do anything yayy
         // Code from: https://stackoverflow.com/a/47764694/9376340
-        return self[index ... index + 1].withUnsafeBytes { $0.load(as: UInt16.self) }
+        let index = Int(index)
+        return self[index ... index &+ 1].withUnsafeBytes { $0.load(as: UInt16.self) }
     }
     
     /**
@@ -36,16 +37,17 @@ extension CPU6502 {
         - index: Index value you want to start from.
         - value: 16 bits value you want to write.
      */
-    public mutating func writeAllocU16(index: Int, value: UInt16) {
+    public mutating func writeAllocU16(index: UInt16, value: UInt16) {
         // It wasa easy to convert array to uint16
         // But hard to convert uint16 back into array oof
         // Code from: https://gist.github.com/kimjj81/aadf55fc591220afdc8450452c2ea21d
+        let index = Int(index)
         var _endian = value.littleEndian
         let bytePtr = withUnsafePointer(to: &_endian) {
             $0.withMemoryRebound(to: UInt8.self, capacity: MemoryLayout<UInt16>.size) {
                 UnsafeBufferPointer(start: $0, count: MemoryLayout<UInt16>.size)
             }
         }
-        allocs.replaceSubrange(index ... (index + 1), with: [UInt8](bytePtr))
+        allocs.replaceSubrange(index ... (index &+ 1), with: [UInt8](bytePtr))
     }
 }

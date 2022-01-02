@@ -43,6 +43,21 @@ extension CPU6502 {
     }
     
     /**
+     Gets allocated value by index.
+     - parameters:
+        - index: Index of the part you want to get.
+     - returns: Allocated value matches with the index.
+     */
+    subscript(index: UInt16) -> UInt8 {
+        get {
+            return allocs[Int(index)]
+        }
+        set(value) {
+            allocs[Int(index)] = value
+        }
+    }
+    
+    /**
      Gets all allocated values in the provided range.
      - parameters:
         - bounds: Index range of the parts you want to get.
@@ -54,6 +69,21 @@ extension CPU6502 {
         }
         set(value) {
             allocs[bounds] = value
+        }
+    }
+    
+    /**
+     Gets all allocated values in the provided range.
+     - parameters:
+        - bounds: Index range of the parts you want to get.
+     - returns: Allocated values in the parameter range.
+     */
+    subscript(bounds: Range<UInt16>) -> ArraySlice<UInt8> {
+        get {
+            return allocs[Int(bounds.lowerBound) ... Int(bounds.upperBound)]
+        }
+        set(value) {
+            allocs[Int(bounds.lowerBound) ... Int(bounds.upperBound)] = value
         }
     }
     

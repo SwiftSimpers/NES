@@ -14,7 +14,9 @@ extension CPU6502 {
         - value: The 8 bit replacement value.
      - returns: The replacement value.
      */
-    public mutating func LDA(value: UInt8) -> UInt8 {
+    public mutating func LDA(mode: AddressingModes) -> UInt8 {
+        let pointer = getAddress(mode: mode)
+        let value = self[pointer]
         self[.A] = value
         return self[.A]
     }
