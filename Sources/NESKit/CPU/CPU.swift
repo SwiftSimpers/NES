@@ -1,5 +1,5 @@
 public struct CPU6502 {
-    enum RegisterKeys: String {
+    public enum RegisterKeys: String {
         case A, X, Y, S, P
     }
 
