@@ -55,7 +55,7 @@ public struct Memory {
      - parameters:
         - program: Program code in 6502 machine language.
      */
-    mutating func load(program: [UInt8]) {
+    public mutating func load(program: [UInt8]) {
         data.replaceSubrange(Int(ProgramOffset) ..< (Int(ProgramOffset) + program.count), with: program)
         writeAllocU16(index: 0xFFFC, value: ProgramOffset)
     }
@@ -65,7 +65,7 @@ public struct Memory {
      - parameters:
         - index: Index value you want to start from.
      */
-    func readAllocU16(index: UInt16) -> UInt16 {
+    public func readAllocU16(index: UInt16) -> UInt16 {
         // Somehow UInt16 by default reads bytes in little endian order
         // So we don't have to do anything yayy
         // Code from: https://stackoverflow.com/a/47764694/9376340
@@ -78,7 +78,7 @@ public struct Memory {
         - index: Index value you want to start from.
         - value: 16 bits value you want to write.
      */
-    mutating func writeAllocU16(index: UInt16, value: UInt16) {
+    public mutating func writeAllocU16(index: UInt16, value: UInt16) {
         // Code from: https://stackoverflow.com/a/38024025/9376340
         let index = Int(index)
         let littleEndian = value.littleEndian

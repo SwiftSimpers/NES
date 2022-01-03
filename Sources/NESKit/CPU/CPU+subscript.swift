@@ -58,6 +58,21 @@ public extension CPU6502 {
     }
 
     /**
+     Gets stack value by index.
+     - parameters:
+        - index: Index of the part you want to get.
+     - returns: Stack value matches with the index.
+     */
+    subscript(index: UInt8) -> UInt8 {
+        get {
+            return memory[Int(index)]
+        }
+        set(value) {
+            memory[Int(index)] = value
+        }
+    }
+
+    /**
      Gets all allocated values in the provided range.
      - parameters:
         - bounds: Index range of the parts you want to get.
@@ -69,6 +84,25 @@ public extension CPU6502 {
         }
         set(value) {
             memory[rangeExpression] = value
+        }
+    }
+
+    subscript(index: Address) -> UInt8 {
+        get {
+            switch index {
+            case let .memory(address):
+                return memory[address]
+            case let .register(key):
+                return registers[key] ?? 0
+            }
+        }
+        set {
+            switch index {
+            case let .memory(address):
+                memory[address] = newValue
+            case let .register(key):
+                registers[key] = newValue
+            }
         }
     }
 }

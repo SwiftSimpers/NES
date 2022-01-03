@@ -8,5 +8,5 @@
 import Foundation
 
 public enum AddressingModes {
-    case immidiate, zero, zeroX, zeroY, abs, absX, absY, indirectX, indirectY
+    case immidiate, zero, zeroX, zeroY, abs, absX, absY, indirect, indirectX, indirectY, accumulator, relative
 }
