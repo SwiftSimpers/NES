@@ -8,4 +8,5 @@ public struct Assembler6502 {
     var tokens: [Token] = []
     var nodes: [Node] = []
     var instructionOffset: Int = 0
+    var assembly: Data? = nil
 }

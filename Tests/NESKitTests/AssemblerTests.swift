@@ -38,4 +38,13 @@ final class AssemblerTests: XCTestCase {
         // dump(assembler.nodes)
         XCTAssertEqual(assembler.nodes.count, 12)
     }
+
+    func testEmitter() throws {
+        var assembler = Assembler6502()
+        try assembler.lex(source: assembly)
+        try assembler.parse()
+        try assembler.assemble()
+        printHexDumpForBytes(bytes: assembler.assembly!)
+        XCTAssertEqual(assembler.assembly!.count, assembler.instructionOffset)
+    }
 }
