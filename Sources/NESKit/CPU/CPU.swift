@@ -1,16 +1,12 @@
 import Foundation
 
 public struct CPU6502 {
-    public enum RegisterKeys: String {
-        case A, X, Y, S, P
-    }
-
     public enum Address {
         case memory(UInt16)
-        case register(RegisterKeys)
+        case register(Register)
     }
 
-    internal var registers: [RegisterKeys: UInt8] = [:]
+    internal var registers: [Register: UInt8] = [:]
     internal var memory: Memory = .init()
 
     private var _PC: UInt16 = 0

@@ -14,7 +14,7 @@ public extension CPU6502 {
         - register: Register key you want to get the value.
      - returns: Register value matches with the key.
      */
-    subscript(register: RegisterKeys) -> UInt8 {
+    subscript(register: Register) -> UInt8 {
         get {
             return registers[register] ?? 0
         }
