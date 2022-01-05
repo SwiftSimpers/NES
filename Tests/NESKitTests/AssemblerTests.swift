@@ -30,4 +30,12 @@ final class AssemblerTests: XCTestCase {
         // dump(assembler.tokens)
         XCTAssertEqual(assembler.tokens.count, 53)
     }
+
+    func testAST() throws {
+        var assembler = Assembler6502()
+        try assembler.lex(source: assembly)
+        try assembler.parse()
+        // dump(assembler.nodes)
+        XCTAssertEqual(assembler.nodes.count, 12)
+    }
 }
