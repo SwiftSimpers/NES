@@ -17,12 +17,16 @@ enum InstructionArgument {
     case relative(Int)
     /// Basically A (register)
     case accumulator
+    /// Label (for offsets). We can say this is just `absolute` but
+    /// except for the fact that it is replaced by absolute values
+    /// when emitting the code.
+    case label(String)
 }
 
 extension InstructionArgument {
     var size: Int {
         switch self {
-        case .abs, .indirect, .indirectVec, .absVec:
+        case .abs, .indirect, .indirectVec, .absVec, .label:
             return 2
         case .immediate, .relative, .zero, .zeroVec:
             return 1
@@ -63,6 +67,7 @@ let instructionTakeingArg = [
     "BPL",
     "BVC",
     "BVS",
+    "JSR",
 ]
 
 let branchInstructions = [
@@ -96,23 +101,31 @@ enum AssemblerError: Error {
     case unexpectedToken(Token, String)
     case unexpectedEof(String)
     case unexpectedOperator(String)
+    case duplicateLabel(String, Position)
+    case expectedOperator(String, Token?)
 }
 
 extension Assembler6502 {
     mutating func resetAST() {
         nodes = []
+        labels = [:]
         index = 0
         instructionOffset = 0
     }
 
     mutating func nextAST() -> Token? {
-        if index < tokens.count {
+        var token: Token?
+        while index < tokens.count, token == nil {
             index += 1
-            let token = tokens[index - 1]
-            span.end = token.span.end
-            return token
+            switch tokens[index - 1].type {
+            case .comment:
+                break
+            default:
+                token = tokens[index - 1]
+                span.end = token!.span.end
+            }
         }
-        return nil
+        return token
     }
 
     func peekAST() -> Token? {
@@ -122,12 +135,16 @@ extension Assembler6502 {
         return nil
     }
 
-    mutating func parseInstructionArgument(isBranch: Bool = false) throws -> InstructionArgument { // now the p41n starts...
+    mutating func parseInstructionArgument(isBranch: Bool = false) throws -> InstructionArgument {
         guard let token = nextAST() else {
             throw AssemblerError.unexpectedEof("Expected instruction argument")
         }
 
         switch token.type {
+        case .identifier("A"), .identifier("a"):
+            return .accumulator
+        case let .identifier(label):
+            return .label(label)
         case let .operator(op):
             switch op {
             // We will try to match either `#UInt8`, `#(UInt8)` or `#(UInt8, X/Y)`
@@ -277,8 +294,6 @@ extension Assembler6502 {
             // If the instruction is branch related, then it's `UInt8`,
             // otherwise it's `UInt16`
             return isBranch ? .relative(value) : .abs(value)
-        case .identifier("A"):
-            return .accumulator
         default:
             throw AssemblerError.unexpectedToken(token, "Expected operator or number")
         }
@@ -296,6 +311,14 @@ extension Assembler6502 {
     }
 
     mutating func parseLabel(name: String) throws {
+        let next = nextAST()
+        guard case .operator(":") = next?.type else {
+            throw AssemblerError.expectedOperator("Expected ':' (at position: \(position))", next)
+        }
+        if labels.contains(where: { $0.key == name }) {
+            throw AssemblerError.duplicateLabel(name, position)
+        }
+        labels[name] = instructionOffset
         let node = Node.label(name, instructionOffset)
         nodes.append(node)
     }

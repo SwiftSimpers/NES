@@ -7,6 +7,7 @@ public struct Assembler6502 {
     var source: String = ""
     var tokens: [Token] = []
     var nodes: [Node] = []
+    var labels: [String: Int] = [:]
     var instructionOffset: Int = 0
     var assembly: Data? = nil
 }

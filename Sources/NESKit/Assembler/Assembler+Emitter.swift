@@ -4,6 +4,7 @@ enum EmitterError: Error {
     case invalidInstruction(Instruction)
     case unexpectedArgument(Instruction)
     case expectedArgument(String)
+    case labelNotFound(String)
 }
 
 extension Assembler6502 {
@@ -38,16 +39,21 @@ extension Assembler6502 {
         prefix.write(postfix)
     }
 
-    static func << (prefix: inout Assembler6502, postfix: InstructionArgument) {
-        prefix.writeAddress(postfix)
+    static func << (prefix: inout Assembler6502, postfix: InstructionArgument) throws {
+        try prefix.writeAddress(postfix)
     }
 
-    mutating func writeAddress(_ argument: InstructionArgument) {
+    mutating func writeAddress(_ argument: InstructionArgument) throws {
         switch argument {
         case let .immediate(value), let .zero(value), let .zeroVec(value, _), let .relative(value):
             self << UInt8(value)
         case let .indirect(value), let .indirectVec(value, _), let .abs(value), let .absVec(value, _):
             self << UInt16(value)
+        case let .label(name):
+            guard let value = labels[name] else {
+                throw EmitterError.labelNotFound(name)
+            }
+            self << (ProgramOffset + UInt16(value))
         case .accumulator:
             break
         }
@@ -79,7 +85,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "AND":
             guard let arg = inst.arg else {
@@ -105,7 +111,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "ASL":
             guard let arg = inst.arg else {
@@ -125,7 +131,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "BIT":
             guard let arg = inst.arg else {
@@ -139,7 +145,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "BPL":
             guard let arg = inst.arg else {
@@ -148,10 +154,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0x10
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0x10
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BMI":
             guard let arg = inst.arg else {
@@ -160,10 +172,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0x30
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0x30
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BVC":
             guard let arg = inst.arg else {
@@ -172,10 +190,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0x50
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0x50
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BVS":
             guard let arg = inst.arg else {
@@ -184,10 +208,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0x70
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0x70
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BCC":
             guard let arg = inst.arg else {
@@ -196,10 +226,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0x90
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0x90
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BCS":
             guard let arg = inst.arg else {
@@ -208,10 +244,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0xB0
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0xB0
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BNE":
             guard let arg = inst.arg else {
@@ -220,10 +262,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0xD0
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0xD0
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BEQ":
             guard let arg = inst.arg else {
@@ -232,10 +280,16 @@ extension Assembler6502 {
             switch arg {
             case .relative:
                 self << 0xF0
+                try self << arg
+            case let .label(name):
+                guard let value = labels[name] else {
+                    throw EmitterError.labelNotFound(name)
+                }
+                self << 0xF0
+                self << (value - instructionOffset - 2)
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
 
         case "BRK":
             self << 0x00
@@ -264,7 +318,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "CPX":
             guard let arg = inst.arg else {
@@ -280,7 +334,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "CPY":
             guard let arg = inst.arg else {
@@ -296,7 +350,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "DEC":
             guard let arg = inst.arg else {
@@ -314,7 +368,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "EOR":
             guard let arg = inst.arg else {
@@ -340,7 +394,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "CLC":
             self << 0x18
@@ -369,32 +423,32 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "JMP":
             guard let arg = inst.arg else {
                 throw EmitterError.expectedArgument(inst.name)
             }
             switch arg {
-            case .abs:
+            case .abs, .label:
                 self << 0x4C
             case .indirect:
                 self << 0x6C
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
         case "JSR":
             guard let arg = inst.arg else {
                 throw EmitterError.expectedArgument(inst.name)
             }
             switch arg {
-            case .abs:
+            case .abs, .label:
                 self << 0x20
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "LDA":
             guard let arg = inst.arg else {
@@ -420,7 +474,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
         case "LDX":
             guard let arg = inst.arg else {
                 throw EmitterError.expectedArgument(inst.name)
@@ -439,7 +493,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
         case "LDY":
             guard let arg = inst.arg else {
                 throw EmitterError.expectedArgument(inst.name)
@@ -458,7 +512,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "LSR":
             guard let arg = inst.arg else {
@@ -478,7 +532,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "NOP":
             self << 0xEA
@@ -507,7 +561,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "TAX":
             self << 0xAA
@@ -544,7 +598,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
         case "ROR":
             guard let arg = inst.arg else {
                 throw EmitterError.expectedArgument(inst.name)
@@ -563,7 +617,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "RTI":
             self << 0x40
@@ -594,7 +648,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "STA":
             guard let arg = inst.arg else {
@@ -618,7 +672,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         case "TXS":
             self << 0x9A
@@ -647,7 +701,7 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
         case "STY":
             guard let arg = inst.arg else {
                 throw EmitterError.expectedArgument(inst.name)
@@ -662,14 +716,14 @@ extension Assembler6502 {
             default:
                 throw EmitterError.unexpectedArgument(inst)
             }
-            self << arg
+            try self << arg
 
         default:
             throw EmitterError.invalidInstruction(inst)
         }
     }
 
-    mutating func assemble() throws {
+    public mutating func assemble() throws {
         resetEmitter()
         for node in nodes {
             switch node {
