@@ -24,28 +24,13 @@ let snakeGame: [UInt8] = [
     0xEA, 0xCA, 0xD0, 0xFB, 0x60,
 ]
 
-// OH I KNOW FIX
-
 let asm = """
 main:
   jsr init
   jsr loop
 init:
   jsr initSnake
-  jsr generateApplePosition // dj can we just quickly run the original asm to an emulator
-  // well try it
-  // and about this, i think i got it
-  // it works...
-  // it was because...
-  // i only incremented/decremented stack pointer by one
-  // while stack value sizes are 2 bytes...
-  // OH WAIT RIGHT :dead:
-  // jesus fucking christ i want to go and cry in a corner right now.
-  // ikr fuck what did we do lmfao
-  // yeah...
-  // wait then does it work now?
-  // im not sure lemme check but theres no error anymore at least
-  // WHAT
+  jsr generateApplePosition
   rts
 initSnake:
   lda #2
