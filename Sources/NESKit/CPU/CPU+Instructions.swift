@@ -17,7 +17,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.A] = value
-        updateStatus(result: value)
+        updateStatus(negative: value & 0x80 != 0, zero: value == 0)
     }
 
     /**
@@ -25,7 +25,7 @@ public extension CPU6502 {
      */
     mutating func TAX() {
         self[.X] = self[.A]
-        updateStatus(result: self[.X])
+        updateStatus(negative: self[.A] & 0x80 != 0, zero: self[.A] == 0)
     }
 
     /**
@@ -33,7 +33,7 @@ public extension CPU6502 {
      */
     mutating func TXA() {
         self[.A] = self[.X]
-        updateStatus(result: self[.A])
+        updateStatus(negative: self[.A] & 0x80 != 0, zero: self[.A] == 0)
     }
 
     /**
@@ -41,7 +41,7 @@ public extension CPU6502 {
      */
     mutating func DEX() {
         self[.X] &-= 1
-        updateStatus(result: self[.X])
+        updateStatus(negative: self[.X] & 0x80 != 0, zero: self[.X] == 0)
     }
 
     /**
@@ -49,7 +49,7 @@ public extension CPU6502 {
      */
     mutating func INX() {
         self[.X] &+= 1
-        updateStatus(result: self[.X])
+        updateStatus(negative: self[.X] & 0x80 != 0, zero: self[.X] == 0)
     }
 
     /**
@@ -57,7 +57,7 @@ public extension CPU6502 {
      */
     mutating func TAY() {
         self[.Y] = self[.A]
-        updateStatus(result: self[.Y])
+        updateStatus(negative: self[.A] & 0x80 != 0, zero: self[.A] == 0)
     }
 
     /**
@@ -65,7 +65,7 @@ public extension CPU6502 {
      */
     mutating func TYA() {
         self[.A] = self[.Y]
-        updateStatus(result: self[.A])
+        updateStatus(negative: self[.A] & 0x80 != 0, zero: self[.A] == 0)
     }
 
     /**
@@ -73,7 +73,7 @@ public extension CPU6502 {
      */
     mutating func DEY() {
         self[.Y] &-= 1
-        updateStatus(result: self[.Y])
+        updateStatus(negative: self[.Y] & 0x80 != 0, zero: self[.Y] == 0)
     }
 
     /**
@@ -81,7 +81,7 @@ public extension CPU6502 {
      */
     mutating func INY() {
         self[.Y] &+= 1
-        updateStatus(result: self[.Y])
+        updateStatus(negative: self[.Y] & 0x80 != 0, zero: self[.Y] == 0)
     }
 
     /**
@@ -124,7 +124,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let original = self[.A]
         self[.A] &+= value
-        updateStatus(result: self[.A], overflow: original > self[.A], carry: original > self[.A])
+        updateStatus(overflow: original > self[.A], carry: original > self[.A])
     }
 
     /**
@@ -137,7 +137,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let original = self[.A]
         self[.A] &-= value
-        updateStatus(result: self[.A], overflow: original > self[.A], carry: original < self[.A])
+        updateStatus(overflow: original > self[.A], carry: original < self[.A])
     }
 
     /**
@@ -149,7 +149,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.A] &= value
-        updateStatus(result: value)
+        updateStatus(negative: self[.A] & 0x80 != 0, zero: self[.A] == 0)
     }
 
     /**
@@ -162,7 +162,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let result = value << 1
         self[.A] = result
-        updateStatus(result: result, carry: value & 0b0000_0001 != 0)
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: value & 0x80 != 0)
     }
 
     /**
@@ -174,7 +174,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         let result = self[.A] & value
-        updateStatus(result: result, zero: result == 0, negative: value & 0x80 != 0)
+        updateStatus(negative: value & 0x80 != 0, overflow: value & 0x40 != 0, zero: result == 0, carry: value & 0x01 != 0)
     }
 
     /**
@@ -182,7 +182,8 @@ public extension CPU6502 {
      */
     mutating func BPL() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b0001_0000 != 0, case let .memory(address) = pointer {
+        print("bpl \(pointer)")
+        if !getStatus(.negative), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -192,7 +193,7 @@ public extension CPU6502 {
      */
     mutating func BMI() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b0010_0000 != 0, case let .memory(address) = pointer {
+        if getStatus(.negative), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -202,7 +203,7 @@ public extension CPU6502 {
      */
     mutating func BVC() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b0100_0000 == 0, case let .memory(address) = pointer {
+        if !getStatus(.overflow), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -212,7 +213,7 @@ public extension CPU6502 {
      */
     mutating func BVS() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b1000_0000 != 0, case let .memory(address) = pointer {
+        if getStatus(.overflow), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -222,7 +223,7 @@ public extension CPU6502 {
      */
     mutating func BCC() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b0001_0000 == 0, case let .memory(address) = pointer {
+        if !getStatus(.carry), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -232,7 +233,7 @@ public extension CPU6502 {
      */
     mutating func BCS() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b0001_0000 != 0, case let .memory(address) = pointer {
+        if getStatus(.carry), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -242,7 +243,7 @@ public extension CPU6502 {
      */
     mutating func BNE() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b0100_0000 == 0, case let .memory(address) = pointer {
+        if !getStatus(.zero), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -252,7 +253,7 @@ public extension CPU6502 {
      */
     mutating func BEQ() {
         let pointer = getAddress(mode: .relative)
-        if self[.P] & 0b0100_0000 != 0, case let .memory(address) = pointer {
+        if getStatus(.zero), case let .memory(address) = pointer {
             PC = address
         }
     }
@@ -265,8 +266,8 @@ public extension CPU6502 {
     mutating func CMP(mode: AddressingModes) {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
-        let result = self[.A] - value
-        updateStatus(result: result, zero: result == 0, negative: result & 0x80 != 0)
+        let result = self[.A] &- value
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: result >= 0)
     }
 
     /**
@@ -277,8 +278,8 @@ public extension CPU6502 {
     mutating func CPX(mode: AddressingModes) {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
-        let result = self[.X] - value
-        updateStatus(result: result, zero: result == 0, negative: result & 0x80 != 0)
+        let result = self[.X] &- value
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: result >= 0)
     }
 
     /**
@@ -289,8 +290,8 @@ public extension CPU6502 {
     mutating func CPY(mode: AddressingModes) {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
-        let result = self[.Y] - value
-        updateStatus(result: result, zero: result == 0, negative: result & 0x80 != 0)
+        let result = self[.Y] &- value
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: result >= 0)
     }
 
     /**
@@ -303,7 +304,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let result = value &- 1
         self[pointer] = result
-        updateStatus(result: result)
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0)
     }
 
     /**
@@ -315,7 +316,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.A] ^= value
-        updateStatus(result: value)
+        updateStatus(negative: self[.A] & 0x80 != 0, zero: self[.A] == 0)
     }
 
     /**
@@ -363,7 +364,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let result = value &+ 1
         self[pointer] = result
-        updateStatus(result: result)
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0)
     }
 
     /**
@@ -384,7 +385,7 @@ public extension CPU6502 {
     mutating func JSR() {
         let pointer = getAddress(mode: .abs)
         if case let .memory(address) = pointer {
-            pushStack(value: address - 1)
+            pushStack(value: PC - 1)
             PC = address
         }
     }
@@ -393,8 +394,8 @@ public extension CPU6502 {
      Returns from interrupt.
      Pops the address from stack and jumps to address.
      */
-    mutating func RTI() {
-        let address = popStack()
+    mutating func RTI() throws {
+        let address = try popStack()
         PC = address
     }
 
@@ -402,8 +403,8 @@ public extension CPU6502 {
      Returns from subroutine (last call in stack).
      Pops the address from stack and jumps to address + 1.
      */
-    mutating func RTS() {
-        let address = popStack()
+    mutating func RTS() throws {
+        let address = try popStack()
         PC = address + 1
     }
 
@@ -416,7 +417,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.X] = value
-        updateStatus(result: value)
+        updateStatus(negative: value & 0x80 != 0, zero: value == 0)
     }
 
     /**
@@ -428,7 +429,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.Y] = value
-        updateStatus(result: value)
+        updateStatus(negative: value & 0x80 != 0, zero: value == 0)
     }
 
     /**
@@ -441,7 +442,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let result = value >> 1
         self[.A] = result
-        updateStatus(result: result, carry: value & 0b1000_0000 != 0)
+        updateStatus(carry: value & 0b1000_0000 != 0)
     }
 
     /**
@@ -461,7 +462,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         self[.A] |= value
-        updateStatus(result: value)
+        updateStatus(negative: self[.A] & 0x80 != 0, zero: self[.A] == 0)
     }
 
     /**
@@ -474,7 +475,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let result = (value << 1) | (self[.P] & 0b0000_0001)
         self[.A] = result
-        updateStatus(result: result, carry: value & 0b1000_0000 != 0)
+        updateStatus(carry: value & 0b1000_0000 != 0)
     }
 
     /**
@@ -487,7 +488,7 @@ public extension CPU6502 {
         let value = self[pointer]
         let result = (value >> 1) | (self[.P] & 0b1000_0000)
         self[.A] = result
-        updateStatus(result: result, carry: value & 0b0000_0001 != 0)
+        updateStatus(carry: value & 0b0000_0001 != 0)
     }
 
     /**
