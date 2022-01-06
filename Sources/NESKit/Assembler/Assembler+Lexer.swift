@@ -52,6 +52,7 @@ let instructions: [String] = [
     "LDA",
     "LDX",
     "LDY",
+    "NOP",
 ]
 
 struct Position {
@@ -80,6 +81,7 @@ struct Token {
 enum LexerError: Error {
     case unexpectedEof
     case unexpectedCharacter(Position, Character)
+    case intError(Position, String)
 }
 
 extension String {
@@ -193,11 +195,21 @@ extension Assembler6502 {
                     _ = nextLexer()
                 }
 
+            case "A" ... "F", "a" ... "f":
+                guard radix == 16 else {
+                    throw LexerError.unexpectedCharacter(position, nextChar)
+                }
+                number += String(nextChar)
+                _ = nextLexer()
+
             default:
                 break loop
             }
         }
-        tokens.append(Token(type: .number(Int(number, radix: radix)!), span: span))
+        guard let parsed = Int(number, radix: radix) else {
+            throw LexerError.intError(position, number)
+        }
+        tokens.append(Token(type: .number(parsed), span: span))
     }
 
     mutating func parseOperator(char: Character) throws {
