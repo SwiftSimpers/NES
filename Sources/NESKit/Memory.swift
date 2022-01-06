@@ -1,9 +1,9 @@
 import Foundation
 
-public let ProgramOffset: UInt16 = 0x8000
+public let ProgramOffset: UInt16 = 0x600
 
 public struct Memory {
-    private var data: Data = .init(count: 0xFFFF)
+    var data: Data = .init(count: 0xFFFF)
 
     /**
      Gets allocated value by index.
@@ -66,10 +66,7 @@ public struct Memory {
         - index: Index value you want to start from.
      */
     public func readAllocU16(index: UInt16) -> UInt16 {
-        // Somehow UInt16 by default reads bytes in little endian order
-        // So we don't have to do anything yayy
-        // Code from: https://stackoverflow.com/a/47764694/9376340
-        return self[index ... index &+ 1].withUnsafeBytes { $0.load(as: UInt16.self) }
+        return UInt16(data[Int(index)]) | UInt16(data[Int(index) + 1]) << 8
     }
 
     /**
