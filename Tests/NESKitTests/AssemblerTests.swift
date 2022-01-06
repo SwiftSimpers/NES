@@ -20,7 +20,11 @@ LDA #(0x69)
 LDA #(0x69,X)
 LDX #(0x69,Y)
 BEQ 0x69
+JSR func
 BRK
+
+func:
+  LDA #0x69
 """
 
 final class AssemblerTests: XCTestCase {
@@ -28,7 +32,7 @@ final class AssemblerTests: XCTestCase {
         var assembler = Assembler6502()
         try assembler.lex(source: assembly)
         // dump(assembler.tokens)
-        XCTAssertEqual(assembler.tokens.count, 53)
+        XCTAssertEqual(assembler.tokens.count, 60)
     }
 
     func testAST() throws {
@@ -36,7 +40,7 @@ final class AssemblerTests: XCTestCase {
         try assembler.lex(source: assembly)
         try assembler.parse()
         // dump(assembler.nodes)
-        XCTAssertEqual(assembler.nodes.count, 12)
+        XCTAssertEqual(assembler.nodes.count, 15)
     }
 
     func testEmitter() throws {
