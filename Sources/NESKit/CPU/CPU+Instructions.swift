@@ -182,7 +182,6 @@ public extension CPU6502 {
      */
     mutating func BPL() {
         let pointer = getAddress(mode: .relative)
-        print("bpl \(pointer)")
         if !getStatus(.negative), case let .memory(address) = pointer {
             PC = address
         }

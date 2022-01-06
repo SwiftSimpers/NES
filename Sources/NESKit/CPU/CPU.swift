@@ -228,7 +228,7 @@ public struct CPU6502 {
 
     public mutating func step() throws -> Status {
         let opcode = self[PC]
-        print("step \(String(format: "%02x", opcode)) at PC: \(String(format: "%04x", PC))")
+        // print("step \(String(format: "%02x", opcode)) at PC: \(String(format: "%04x", PC))")
 
         // if nodes.count > 0, sourceLines.count > 0 {
         //     var node: Instruction?
@@ -309,7 +309,6 @@ public struct CPU6502 {
             BIT(mode: .abs)
 
         case 0x10:
-            print("bpl")
             BPL()
         case 0x30:
             BMI()
@@ -600,7 +599,6 @@ public struct CPU6502 {
             break
         }
 
-        print("step ok")
         return .ok
     }
 
