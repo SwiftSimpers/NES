@@ -237,8 +237,10 @@ final class CPUSnakeTest: XCTestCase {
         // for line in asm.split(separator: "\n") {
         //     cpu.sourceLines.append(String(line))
         // }
-        // print("Run...")
+        // print("Original:")
+        // printHexDumpForBytes(bytes: snakeGame)
+        // print("Assembled:")
+        // printHexDumpForBytes(bytes: assembler.assembly!)
         try cpu.loadAndRun(program: snakeGame)
-        print(Int(ProgramOffset) + snakeGame.count)
     }
 }

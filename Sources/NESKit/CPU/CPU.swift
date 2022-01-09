@@ -226,6 +226,23 @@ public struct CPU6502 {
         }
     }
 
+    public func cycled(_ num: Int, cb: () throws -> Void) throws {
+        let startTime = CFAbsoluteTimeGetCurrent()
+        try cb()
+        let endTime = CFAbsoluteTimeGetCurrent()
+        let timeElapsed = endTime - startTime
+        let timeToWait = 0.000001 * Double(num) - timeElapsed
+        if timeToWait > 0 {
+            Thread.sleep(forTimeInterval: timeToWait)
+        }
+    }
+
+    public func cycled(_ num: Int, cb: () -> Void) {
+        try! cycled(num) { () throws in
+            cb()
+        }
+    }
+
     public mutating func step() throws -> Status {
         let opcode = self[PC]
         // print("step \(String(format: "%02x", opcode)) at PC: \(String(format: "%04x", PC))")
@@ -255,144 +272,270 @@ public struct CPU6502 {
         case 0x00:
             // BRK
             // So that RTI can return from the BRK.
-            pushStack(value: PC + 1)
+            cycled(7) {
+                pushStack(value: PC + 1)
+            }
             return .interrupt(.nmi)
 
         case 0x69:
-            ADC(mode: .immidiate)
+            cycled(2) {
+                ADC(mode: .immidiate)
+            }
         case 0x65:
-            ADC(mode: .zero)
+            cycled(3) {
+                ADC(mode: .zero)
+            }
         case 0x75:
-            ADC(mode: .zeroX)
+            cycled(4) {
+                ADC(mode: .zeroX)
+            }
         case 0x6D:
-            ADC(mode: .abs)
+            cycled(4) {
+                ADC(mode: .abs)
+            }
         case 0x7D:
-            ADC(mode: .absX)
+            cycled(4) {
+                ADC(mode: .absX)
+            }
         case 0x79:
-            ADC(mode: .absY)
+            cycled(4) {
+                ADC(mode: .absY)
+            }
         case 0x61:
-            ADC(mode: .indirectX)
+            cycled(6) {
+                ADC(mode: .indirectX)
+            }
         case 0x71:
-            ADC(mode: .indirectY)
+            cycled(5) {
+                ADC(mode: .indirectY)
+            }
 
         case 0x29:
-            AND(mode: .immidiate)
+            cycled(2) {
+                AND(mode: .immidiate)
+            }
         case 0x25:
-            AND(mode: .zero)
+            cycled(3) {
+                AND(mode: .zero)
+            }
         case 0x35:
-            AND(mode: .zeroX)
+            cycled(4) {
+                AND(mode: .zeroX)
+            }
         case 0x2D:
-            AND(mode: .abs)
+            cycled(4) {
+                AND(mode: .abs)
+            }
         case 0x3D:
-            AND(mode: .absX)
+            cycled(4) {
+                AND(mode: .absX)
+            }
         case 0x39:
-            AND(mode: .absY)
+            cycled(4) {
+                AND(mode: .absY)
+            }
         case 0x21:
-            AND(mode: .indirectX)
+            cycled(6) {
+                AND(mode: .indirectX)
+            }
         case 0x31:
-            AND(mode: .indirectY)
+            cycled(5) {
+                AND(mode: .indirectY)
+            }
 
         case 0x0A:
-            ASL(mode: .accumulator)
+            cycled(2) {
+                ASL(mode: .accumulator)
+            }
         case 0x06:
-            ASL(mode: .zero)
+            cycled(5) {
+                ASL(mode: .zero)
+            }
         case 0x16:
-            ASL(mode: .zeroX)
+            cycled(6) {
+                ASL(mode: .zeroX)
+            }
         case 0x0E:
-            ASL(mode: .abs)
+            cycled(6) {
+                ASL(mode: .abs)
+            }
         case 0x1E:
-            ASL(mode: .absX)
+            cycled(7) {
+                ASL(mode: .absX)
+            }
 
         case 0x24:
-            BIT(mode: .zero)
+            cycled(3) {
+                BIT(mode: .zero)
+            }
         case 0x2C:
-            BIT(mode: .abs)
+            cycled(4) {
+                BIT(mode: .abs)
+            }
 
         case 0x10:
-            BPL()
+            cycled(2) {
+                BPL()
+            }
         case 0x30:
-            BMI()
+            cycled(2) {
+                BMI()
+            }
         case 0x50:
-            BVC()
+            cycled(2) {
+                BVC()
+            }
         case 0x70:
-            BVS()
+            cycled(2) {
+                BVS()
+            }
         case 0x90:
-            BCC()
+            cycled(2) {
+                BCC()
+            }
         case 0xB0:
-            BCS()
+            cycled(2) {
+                BCS()
+            }
         case 0xD0:
-            BNE()
+            cycled(2) {
+                BNE()
+            }
         case 0xF0:
-            BEQ()
+            cycled(2) {
+                BEQ()
+            }
 
         case 0xC9:
-            CMP(mode: .immidiate)
+            cycled(2) {
+                CMP(mode: .immidiate)
+            }
         case 0xC5:
-            CMP(mode: .zero)
+            cycled(3) {
+                CMP(mode: .zero)
+            }
         case 0xD5:
-            CMP(mode: .zeroX)
+            cycled(4) {
+                CMP(mode: .zeroX)
+            }
         case 0xCD:
-            CMP(mode: .abs)
+            cycled(4) {
+                CMP(mode: .abs)
+            }
         case 0xDD:
-            CMP(mode: .absX)
+            cycled(4) {
+                CMP(mode: .absX)
+            }
         case 0xD9:
-            CMP(mode: .absY)
+            cycled(4) {
+                CMP(mode: .absY)
+            }
         case 0xC1:
-            CMP(mode: .indirectX)
+            cycled(6) {
+                CMP(mode: .indirectX)
+            }
         case 0xD1:
-            CMP(mode: .indirectY)
+            cycled(5) {
+                CMP(mode: .indirectY)
+            }
 
         case 0xE0:
-            CPX(mode: .immidiate)
+            cycled(2) {
+                CPX(mode: .immidiate)
+            }
         case 0xE4:
-            CPX(mode: .zero)
+            cycled(3) {
+                CPX(mode: .zero)
+            }
         case 0xEC:
-            CPX(mode: .abs)
+            cycled(4) {
+                CPX(mode: .abs)
+            }
 
         case 0xC0:
-            CPY(mode: .immidiate)
+            cycled(2) {
+                CPY(mode: .immidiate)
+            }
         case 0xC4:
-            CPY(mode: .zero)
+            cycled(3) {
+                CPY(mode: .zero)
+            }
         case 0xCC:
-            CPY(mode: .abs)
+            cycled(4) {
+                CPY(mode: .abs)
+            }
 
         case 0xC6:
-            DEC(mode: .zero)
+            cycled(5) {
+                DEC(mode: .zero)
+            }
         case 0xD6:
-            DEC(mode: .zeroX)
+            cycled(6) {
+                DEC(mode: .zeroX)
+            }
         case 0xCE:
-            DEC(mode: .abs)
+            cycled(6) {
+                DEC(mode: .abs)
+            }
         case 0xDE:
-            DEC(mode: .absX)
+            cycled(7) {
+                DEC(mode: .absX)
+            }
 
         case 0x49:
-            EOR(mode: .immidiate)
+            cycled(2) {
+                EOR(mode: .immidiate)
+            }
         case 0x45:
-            EOR(mode: .zero)
+            cycled(3) {
+                EOR(mode: .zero)
+            }
         case 0x55:
-            EOR(mode: .zeroX)
+            cycled(4) {
+                EOR(mode: .zeroX)
+            }
         case 0x4D:
-            EOR(mode: .abs)
+            cycled(4) {
+                EOR(mode: .abs)
+            }
         case 0x5D:
-            EOR(mode: .absX)
+            cycled(4) {
+                EOR(mode: .absX)
+            }
         case 0x59:
-            EOR(mode: .absY)
+            cycled(4) {
+                EOR(mode: .absY)
+            }
         case 0x41:
-            EOR(mode: .indirectX)
+            cycled(6) {
+                EOR(mode: .indirectX)
+            }
         case 0x51:
-            EOR(mode: .indirectY)
+            cycled(5) {
+                EOR(mode: .indirectY)
+            }
 
         case 0x18:
-            CLC()
+            cycled(2) {
+                CLC()
+            }
         case 0x38:
-            SEC()
+            cycled(2) {
+                SEC()
+            }
         case 0x58:
-            CLI()
+            cycled(2) {
+                CLI()
+            }
         case 0x78:
-            SEI()
+            cycled(2) {
+                SEI()
+            }
 
         case 0xB8:
-            CLV()
+            cycled(2) {
+                CLV()
+            }
 
         // Decimal not implemented yet.
         case 0xD8:
@@ -405,195 +548,368 @@ public struct CPU6502 {
             break
 
         case 0xE6:
-            INC(mode: .zero)
+            cycled(5) {
+                INC(mode: .zero)
+            }
         case 0xF6:
-            INC(mode: .zeroX)
+            cycled(6) {
+                INC(mode: .zeroX)
+            }
         case 0xEE:
-            INC(mode: .abs)
+            cycled(6) {
+                INC(mode: .abs)
+            }
         case 0xFE:
-            INC(mode: .absX)
+            cycled(7) {
+                INC(mode: .absX)
+            }
 
         case 0x4C:
-            JMP(mode: .abs)
+            cycled(3) {
+                JMP(mode: .abs)
+            }
         case 0x6C:
-            JMP(mode: .indirect)
+            cycled(5) {
+                JMP(mode: .indirect)
+            }
 
         case 0x20:
-            JSR()
+            cycled(6) {
+                JSR()
+            }
 
         case 0xA9:
-            LDA(mode: .immidiate)
+            cycled(2) {
+                LDA(mode: .immidiate)
+            }
         case 0xA5:
-            LDA(mode: .zero)
+            cycled(3) {
+                LDA(mode: .zero)
+            }
         case 0xB5:
-            LDA(mode: .zeroX)
+            cycled(4) {
+                LDA(mode: .zeroX)
+            }
         case 0xAD:
-            LDA(mode: .abs)
+            cycled(4) {
+                LDA(mode: .abs)
+            }
         case 0xBD:
-            LDA(mode: .absX)
+            cycled(4) {
+                LDA(mode: .absX)
+            }
         case 0xB9:
-            LDA(mode: .absY)
+            cycled(4) {
+                LDA(mode: .absY)
+            }
         case 0xA1:
-            LDA(mode: .indirectX)
+            cycled(6) {
+                LDA(mode: .indirectX)
+            }
         case 0xB1:
-            LDA(mode: .indirectY)
+            cycled(5) {
+                LDA(mode: .indirectY)
+            }
 
         case 0xA2:
-            LDX(mode: .immidiate)
+            cycled(2) {
+                LDX(mode: .immidiate)
+            }
         case 0xA6:
-            LDX(mode: .zero)
+            cycled(3) {
+                LDX(mode: .zero)
+            }
         case 0xB6:
-            LDX(mode: .zeroY)
+            cycled(4) {
+                LDX(mode: .zeroY)
+            }
         case 0xAE:
-            LDX(mode: .abs)
+            cycled(4) {
+                LDX(mode: .abs)
+            }
         case 0xBE:
-            LDX(mode: .absY)
+            cycled(4) {
+                LDX(mode: .absY)
+            }
 
         case 0xA0:
-            LDY(mode: .immidiate)
+            cycled(2) {
+                LDY(mode: .immidiate)
+            }
         case 0xA4:
-            LDY(mode: .zero)
+            cycled(3) {
+                LDY(mode: .zero)
+            }
         case 0xB4:
-            LDY(mode: .zeroX)
+            cycled(4) {
+                LDY(mode: .zeroX)
+            }
         case 0xAC:
-            LDY(mode: .abs)
+            cycled(4) {
+                LDY(mode: .abs)
+            }
         case 0xBC:
-            LDY(mode: .absX)
+            cycled(4) {
+                LDY(mode: .absX)
+            }
 
         case 0x4A:
-            LSR(mode: .accumulator)
+            cycled(2) {
+                LSR(mode: .accumulator)
+            }
         case 0x46:
-            LSR(mode: .zero)
+            cycled(5) {
+                LSR(mode: .zero)
+            }
         case 0x56:
-            LSR(mode: .zeroX)
+            cycled(6) {
+                LSR(mode: .zeroX)
+            }
         case 0x4E:
-            LSR(mode: .abs)
+            cycled(6) {
+                LSR(mode: .abs)
+            }
         case 0x5E:
-            LSR(mode: .absX)
+            cycled(7) {
+                LSR(mode: .absX)
+            }
 
         case 0xEA:
-            NOP()
+            // yes, somehow nop also consumes 2 cycles
+            cycled(2) {
+                NOP()
+            }
 
         case 0x09:
-            ORA(mode: .immidiate)
+            cycled(2) {
+                ORA(mode: .immidiate)
+            }
         case 0x05:
-            ORA(mode: .zero)
+            cycled(3) {
+                ORA(mode: .zero)
+            }
         case 0x15:
-            ORA(mode: .zeroX)
+            cycled(4) {
+                ORA(mode: .zeroX)
+            }
         case 0x0D:
-            ORA(mode: .abs)
+            cycled(4) {
+                ORA(mode: .abs)
+            }
         case 0x1D:
-            ORA(mode: .absX)
+            cycled(4) {
+                ORA(mode: .absX)
+            }
         case 0x19:
-            ORA(mode: .absY)
+            cycled(4) {
+                ORA(mode: .absY)
+            }
         case 0x01:
-            ORA(mode: .indirectX)
+            cycled(6) {
+                ORA(mode: .indirectX)
+            }
         case 0x11:
-            ORA(mode: .indirectY)
+            cycled(5) {
+                ORA(mode: .indirectY)
+            }
 
         case 0xAA:
-            TAX()
+            cycled(2) {
+                TAX()
+            }
         case 0x8A:
-            TXA()
+            cycled(2) {
+                TXA()
+            }
         case 0xCA:
-            DEX()
+            cycled(2) {
+                DEX()
+            }
         case 0xE8:
-            INX()
+            cycled(2) {
+                INX()
+            }
         case 0xA8:
-            TAY()
+            cycled(2) {
+                TAY()
+            }
         case 0x98:
-            TYA()
+            cycled(2) {
+                TYA()
+            }
         case 0x88:
-            DEY()
+            cycled(2) {
+                DEY()
+            }
         case 0xC8:
-            INY()
+            cycled(2) {
+                INY()
+            }
 
         case 0x2A:
-            ROL(mode: .accumulator)
+            cycled(2) {
+                ROL(mode: .accumulator)
+            }
         case 0x26:
-            ROL(mode: .zero)
+            cycled(5) {
+                ROL(mode: .zero)
+            }
         case 0x36:
-            ROL(mode: .zeroX)
+            cycled(6) {
+                ROL(mode: .zeroX)
+            }
         case 0x2E:
-            ROL(mode: .abs)
+            cycled(6) {
+                ROL(mode: .abs)
+            }
         case 0x3E:
-            ROL(mode: .absX)
+            cycled(7) {
+                ROL(mode: .absX)
+            }
 
         case 0x6A:
-            ROR(mode: .accumulator)
+            cycled(2) {
+                ROR(mode: .accumulator)
+            }
         case 0x66:
-            ROR(mode: .zero)
+            cycled(5) {
+                ROR(mode: .zero)
+            }
         case 0x76:
-            ROR(mode: .zeroX)
+            cycled(6) {
+                ROR(mode: .zeroX)
+            }
         case 0x6E:
-            ROR(mode: .abs)
+            cycled(6) {
+                ROR(mode: .abs)
+            }
         case 0x7E:
-            ROR(mode: .absX)
+            cycled(7) {
+                ROR(mode: .absX)
+            }
 
         case 0x40:
-            try RTI()
+            try cycled(2) {
+                try RTI()
+            }
 
         case 0x60:
-            try RTS()
+            try cycled(2) {
+                try RTS()
+            }
 
         case 0xE9:
-            SBC(mode: .immidiate)
+            cycled(2) {
+                SBC(mode: .immidiate)
+            }
         case 0xE5:
-            SBC(mode: .zero)
+            cycled(3) {
+                SBC(mode: .zero)
+            }
         case 0xF5:
-            SBC(mode: .zeroX)
+            cycled(4) {
+                SBC(mode: .zeroX)
+            }
         case 0xED:
-            SBC(mode: .abs)
+            cycled(4) {
+                SBC(mode: .abs)
+            }
         case 0xFD:
-            SBC(mode: .absX)
+            cycled(4) {
+                SBC(mode: .absX)
+            }
         case 0xF9:
-            SBC(mode: .absY)
+            cycled(4) {
+                SBC(mode: .absY)
+            }
         case 0xE1:
-            SBC(mode: .indirectX)
+            cycled(6) {
+                SBC(mode: .indirectX)
+            }
         case 0xF1:
-            SBC(mode: .indirectY)
+            cycled(5) {
+                SBC(mode: .indirectY)
+            }
 
         case 0x85:
-            STA(mode: .zero)
+            cycled(3) {
+                STA(mode: .zero)
+            }
         case 0x95:
-            STA(mode: .zeroX)
+            cycled(4) {
+                STA(mode: .zeroX)
+            }
         case 0x8D:
-            STA(mode: .abs)
+            cycled(4) {
+                STA(mode: .abs)
+            }
         case 0x9D:
-            STA(mode: .absX)
+            cycled(5) {
+                STA(mode: .absX)
+            }
         case 0x99:
-            STA(mode: .absY)
+            cycled(5) {
+                STA(mode: .absY)
+            }
         case 0x81:
-            STA(mode: .indirectX)
+            cycled(6) {
+                STA(mode: .indirectX)
+            }
         case 0x91:
-            STA(mode: .indirectY)
+            cycled(6) {
+                STA(mode: .indirectY)
+            }
 
         case 0x9A:
-            TXS()
+            cycled(2) {
+                TXS()
+            }
         case 0xBA:
-            TSX()
+            cycled(2) {
+                TSX()
+            }
         case 0x48:
-            PHA()
+            cycled(2) {
+                PHA()
+            }
         case 0x68:
-            PLA()
+            cycled(2) {
+                PLA()
+            }
         case 0x08:
-            PHP()
+            cycled(3) {
+                PHP()
+            }
         case 0x28:
-            PLP()
+            cycled(4) {
+                PLP()
+            }
 
         case 0x86:
-            STX(mode: .zero)
+            cycled(3) {
+                STX(mode: .zero)
+            }
         case 0x96:
-            STX(mode: .zeroY)
+            cycled(4) {
+                STX(mode: .zeroY)
+            }
         case 0x8E:
-            STX(mode: .abs)
+            cycled(4) {
+                STX(mode: .abs)
+            }
 
         case 0x84:
-            STY(mode: .zero)
+            cycled(3) {
+                STY(mode: .zero)
+            }
         case 0x94:
-            STY(mode: .zeroX)
+            cycled(4) {
+                STY(mode: .zeroX)
+            }
         case 0x8C:
-            STY(mode: .abs)
+            cycled(4) {
+                STY(mode: .abs)
+            }
 
         default:
             break
