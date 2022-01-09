@@ -17,7 +17,7 @@
 // destinations, and other lower-level functions are available to construct
 // different formats of hex-dump output.
 
-import Cocoa
+import Foundation
 
 /// Split a sequence into equal-size chunks and process each chunk.
 ///
