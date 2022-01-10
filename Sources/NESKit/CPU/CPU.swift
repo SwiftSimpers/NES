@@ -73,6 +73,8 @@ public struct CPU6502 {
             _PC = value
         }
     }
+    
+    public init() {}
 
     internal mutating func getAddress(mode: AddressingModes) -> Address {
         switch mode {

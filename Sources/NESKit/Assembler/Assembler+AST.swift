@@ -105,7 +105,7 @@ enum AssemblerError: Error {
     case expectedOperator(String, Token?)
 }
 
-extension Assembler6502 {
+public extension Assembler6502 {
     mutating func resetAST() {
         nodes = []
         labels = [:]

@@ -7,7 +7,7 @@ enum EmitterError: Error {
     case labelNotFound(String)
 }
 
-extension Assembler6502 {
+public extension Assembler6502 {
     mutating func resetEmitter() {
         // The last added instruction also pushes its size onto offset,
         // causing it to become the size of the assembled code.

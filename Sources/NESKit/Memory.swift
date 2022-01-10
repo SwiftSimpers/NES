@@ -49,6 +49,8 @@ public struct Memory {
             data[rangeExpression] = value
         }
     }
+    
+    public init() {}
 
     /**
      Allocates the program into CPU.

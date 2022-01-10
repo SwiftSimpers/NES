@@ -10,4 +10,6 @@ public struct Assembler6502 {
     var labels: [String: Int] = [:]
     var instructionOffset: Int = 0
     var assembly: Data? = nil
+    
+    public init() {}
 }

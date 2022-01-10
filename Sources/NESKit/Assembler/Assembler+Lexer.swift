@@ -95,7 +95,7 @@ extension String {
     }
 }
 
-extension Assembler6502 {
+public extension Assembler6502 {
     mutating func resetLexer() {
         index = 0
         position = Position(line: 1, column: 1)
