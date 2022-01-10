@@ -49,11 +49,18 @@ public struct CPU6502 {
         case interrupt(InterruptType)
     }
 
+    public enum ClockSpeed: Int {
+        case NTSC = 1_789_773
+        case PAL = 1_662_607
+    }
+
     internal var registers: [Register: UInt8] = [:]
     internal var memory: Memory = .init()
 
     var nodes: [Node] = []
     var sourceLines: [String] = []
+    /// Clock speed in hz.
+    public var clockSpeed: Int = ClockSpeed.NTSC.rawValue
 
     private var _PC: UInt16 = 0
     // Separated since PC needs 16 bits.
@@ -227,11 +234,13 @@ public struct CPU6502 {
     }
 
     public func cycled(_ num: Int, cb: () throws -> Void) throws {
-        let startTime = CFAbsoluteTimeGetCurrent()
+        let startTime = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         try cb()
-        let endTime = CFAbsoluteTimeGetCurrent()
-        let timeElapsed = endTime - startTime
-        let timeToWait = 0.000001 * Double(num) - timeElapsed
+        let endTime = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
+        let timeElapsed = Double(endTime - startTime) / 1e+9
+        // print("Time: \(String(format: "%f", timeElapsed))")
+        let timeToWait = Double(1 / clockSpeed * num) - timeElapsed
+        // print("Wait: \(String(format: "%f", timeToWait))")
         if timeToWait > 0 {
             Thread.sleep(forTimeInterval: timeToWait)
         }
