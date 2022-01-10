@@ -942,6 +942,15 @@ public struct CPU6502 {
             }
         }
     }
+    
+    /**
+     Allocates the program into CPU.
+     - parameters:
+        - program: Program code in 6502 machine language.
+     */
+    public mutating func load(program: [UInt8]) {
+        memory.load(program: program)
+    }
 
     /**
      Allocates the program into CPU and executes the program.
@@ -949,7 +958,7 @@ public struct CPU6502 {
         - program: Program code in 6502 machine language.
      */
     public mutating func loadAndRun(program: [UInt8]) throws {
-        memory.load(program: program)
+        load(program: program)
         try run()
     }
 }
