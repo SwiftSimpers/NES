@@ -113,7 +113,7 @@ public extension Assembler6502 {
         instructionOffset = 0
     }
 
-    mutating func nextAST() -> Token? {
+    mutating internal func nextAST() -> Token? {
         var token: Token?
         while index < tokens.count, token == nil {
             index += 1
@@ -128,14 +128,14 @@ public extension Assembler6502 {
         return token
     }
 
-    func peekAST() -> Token? {
+    internal func peekAST() -> Token? {
         if index < tokens.count {
             return tokens[index]
         }
         return nil
     }
 
-    mutating func parseInstructionArgument(isBranch: Bool = false) throws -> InstructionArgument {
+    mutating internal func parseInstructionArgument(isBranch: Bool = false) throws -> InstructionArgument {
         guard let token = nextAST() else {
             throw AssemblerError.unexpectedEof("Expected instruction argument")
         }

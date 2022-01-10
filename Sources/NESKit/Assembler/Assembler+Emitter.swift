@@ -39,11 +39,11 @@ public extension Assembler6502 {
         prefix.write(postfix)
     }
 
-    static func << (prefix: inout Assembler6502, postfix: InstructionArgument) throws {
+    static internal func << (prefix: inout Assembler6502, postfix: InstructionArgument) throws {
         try prefix.writeAddress(postfix)
     }
 
-    mutating func writeAddress(_ argument: InstructionArgument) throws {
+    mutating internal func writeAddress(_ argument: InstructionArgument) throws {
         switch argument {
         case let .immediate(value), let .zero(value), let .zeroVec(value, _), let .relative(value):
             self << UInt8(value)
@@ -59,7 +59,7 @@ public extension Assembler6502 {
         }
     }
 
-    mutating func emit(inst: Instruction) throws {
+    mutating internal func emit(inst: Instruction) throws {
         switch inst.name {
         case "ADC":
             guard let arg = inst.arg else {
@@ -723,7 +723,7 @@ public extension Assembler6502 {
         }
     }
 
-    public mutating func assemble() throws {
+    mutating func assemble() throws {
         resetEmitter()
         for node in nodes {
             switch node {
