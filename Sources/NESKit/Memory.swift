@@ -2,8 +2,15 @@ import Foundation
 
 public let ProgramOffset: UInt16 = 0x600
 
+public struct MemoryRegion {
+    public var range: Range<UInt16>
+    public var read: (Memory, UInt16) -> UInt8
+    public var write: (Memory, UInt16, UInt8) -> Void
+}
+
 public struct Memory {
-    var data: Data = .init(count: 0xFFFF)
+    public var data: Data = .init(count: 0xFFFF)
+    public var regions: [MemoryRegion] = []
 
     /**
      Gets allocated value by index.
@@ -28,9 +35,20 @@ public struct Memory {
      */
     subscript(index: UInt16) -> UInt8 {
         get {
+            for region in regions {
+                if region.range.contains(index) {
+                    return region.read(self, index)
+                }
+            }
             return data[Int(index)]
         }
         set(value) {
+            for region in regions {
+                if region.range.contains(index) {
+                    region.write(self, index, value)
+                    return
+                }
+            }
             data[Int(index)] = value
         }
     }
@@ -49,7 +67,7 @@ public struct Memory {
             data[rangeExpression] = value
         }
     }
-    
+
     public init() {}
 
     /**
