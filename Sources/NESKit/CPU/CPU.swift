@@ -9,27 +9,12 @@ enum StackError: Error {
 public enum StatusFlag: UInt8 {
     case negative = 0b1000_0000
     case overflow = 0b0100_0000
-    // unused _ = 0b0010_0000
-    // unused B = 0b0001_0000
+    case break1 = 0b0010_0000
+    case break2 = 0b0001_0000
     case decimal = 0b0000_1000
     case interrupt = 0b0000_0100
     case zero = 0b0000_0010
     case carry = 0b0000_0001
-}
-
-extension StatusFlag {
-    func complement() -> UInt8 {
-        switch self {
-        case .negative: return 0b0111_1111
-        case .overflow: return 0b1011_1111
-        // unused _ = 0b1101_1111
-        // unused B = 0b1110_1111
-        case .decimal: return 0b1111_0111
-        case .interrupt: return 0b1111_1011
-        case .zero: return 0b1111_1101
-        case .carry: return 0b1111_1110
-        }
-    }
 }
 
 public struct CPU6502 {
@@ -137,7 +122,7 @@ public struct CPU6502 {
             .X: 0,
             .Y: 0,
             .S: 0xFF,
-            .P: 0,
+            .P: 0b0010_0100,
         ]
         PC = memory.readAllocU16(index: 0xFFFC)
     }
@@ -175,8 +160,8 @@ public struct CPU6502 {
 
     /**
      Updates the status register based on the result.
-     - parameters:
-        - result: Result value of the execution.
+     - parameters: Various status flags. Nil means don't update,
+       true / false adds / removes them from P register.
      */
     public mutating func updateStatus(
         negative: Bool? = nil,
@@ -190,7 +175,7 @@ public struct CPU6502 {
             if negative {
                 self[.P] |= StatusFlag.negative.rawValue
             } else {
-                self[.P] &= StatusFlag.negative.complement()
+                self[.P] &= ~StatusFlag.negative.rawValue
             }
         }
 
@@ -198,7 +183,7 @@ public struct CPU6502 {
             if overflow {
                 self[.P] |= StatusFlag.overflow.rawValue
             } else {
-                self[.P] &= StatusFlag.overflow.complement()
+                self[.P] &= ~StatusFlag.overflow.rawValue
             }
         }
 
@@ -206,7 +191,7 @@ public struct CPU6502 {
             if decimal {
                 self[.P] |= StatusFlag.decimal.rawValue
             } else {
-                self[.P] &= StatusFlag.decimal.complement()
+                self[.P] &= ~StatusFlag.decimal.rawValue
             }
         }
 
@@ -214,7 +199,7 @@ public struct CPU6502 {
             if interrupt {
                 self[.P] |= StatusFlag.interrupt.rawValue
             } else {
-                self[.P] &= StatusFlag.interrupt.complement()
+                self[.P] &= ~StatusFlag.interrupt.rawValue
             }
         }
 
@@ -222,7 +207,7 @@ public struct CPU6502 {
             if zero {
                 self[.P] |= StatusFlag.zero.rawValue
             } else {
-                self[.P] &= StatusFlag.zero.complement()
+                self[.P] &= ~StatusFlag.zero.rawValue
             }
         }
 
@@ -230,7 +215,7 @@ public struct CPU6502 {
             if carry {
                 self[.P] |= StatusFlag.carry.rawValue
             } else {
-                self[.P] &= StatusFlag.carry.complement()
+                self[.P] &= ~StatusFlag.carry.rawValue
             }
         }
     }
