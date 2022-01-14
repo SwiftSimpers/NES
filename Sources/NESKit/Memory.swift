@@ -4,12 +4,12 @@ public let ProgramOffset: UInt16 = 0x600
 
 public struct MemoryRegion {
     public var range: Range<UInt16>
-    public var read: (Memory, UInt16) -> UInt8
+    public var read: (Memory, UInt16) -> Void
     public var write: (Memory, UInt16, UInt8) -> Void
 
     public init() {
         range = 0x0000 ..< 0xFFFF
-        read = { _, _ in 0 }
+        read = { _, _ in }
         write = { _, _, _ in }
     }
 }
@@ -43,19 +43,18 @@ public struct Memory {
         get {
             for region in regions {
                 if region.range.contains(index) {
-                    return region.read(self, index)
+                    region.read(self, index)
                 }
             }
             return data[Int(index)]
         }
         set(value) {
+            data[Int(index)] = value
             for region in regions {
                 if region.range.contains(index) {
                     region.write(self, index, value)
-                    return
                 }
             }
-            data[Int(index)] = value
         }
     }
 
