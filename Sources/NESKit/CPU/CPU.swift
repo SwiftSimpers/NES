@@ -62,6 +62,11 @@ public struct CPU6502 {
 
     public init() {}
 
+    /// Defines a new Memory Region.
+    public mutating func memory(region: MemoryRegion) {
+        memory.regions.append(region)
+    }
+
     internal mutating func getAddress(mode: AddressingModes) -> Address {
         switch mode {
         case .immidiate:
