@@ -220,22 +220,19 @@ public struct CPU6502 {
         }
     }
 
-    public func cycled(_ num: Int, cb: () throws -> Void) throws {
+    public func cycled(_ num: Int, cb: () throws -> Void) rethrows {
         let startTime = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
         try cb()
         let endTime = clock_gettime_nsec_np(CLOCK_MONOTONIC_RAW)
+        if clockSpeed == 0 {
+            return
+        }
         let timeElapsed = Double(endTime - startTime) / 1e+9
         // print("Time: \(String(format: "%f", timeElapsed))")
         let timeToWait = Double(1 / clockSpeed * num) - timeElapsed
         // print("Wait: \(String(format: "%f", timeToWait))")
         if timeToWait > 0 {
             Thread.sleep(forTimeInterval: timeToWait)
-        }
-    }
-
-    public func cycled(_ num: Int, cb: () -> Void) {
-        try! cycled(num) { () throws in
-            cb()
         }
     }
 
