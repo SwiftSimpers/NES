@@ -44,11 +44,12 @@ public struct CPU6502 {
 
     var nodes: [Node] = []
     var sourceLines: [String] = []
-    /// Clock speed in hz.
+    /// Clock speed in Hz
     public var clockSpeed: Int = ClockSpeed.NTSC.rawValue
 
     private var _PC: UInt16 = 0
-    // Separated since PC needs 16 bits.
+
+    // Separated since PC needs 16 bits
     /// Program counter register.
     public var PC: UInt16 {
         get {
@@ -58,7 +59,7 @@ public struct CPU6502 {
             _PC = value
         }
     }
-    
+
     public init() {}
 
     internal mutating func getAddress(mode: AddressingModes) -> Address {
@@ -238,27 +239,6 @@ public struct CPU6502 {
 
     public mutating func step() throws -> Status {
         let opcode = self[PC]
-        // print("step \(String(format: "%02x", opcode)) at PC: \(String(format: "%04x", PC))")
-
-        // if nodes.count > 0, sourceLines.count > 0 {
-        //     var node: Instruction?
-        //     for e in nodes {
-        //         if case let .instruction(inst) = e {
-        //             if inst.offset == PC - ProgramOffset {
-        //                 node = inst
-        //                 break
-        //             }
-        //         }
-        //     }
-        //     if let node = node {
-        //         let line = sourceLines[node.span.start.line - 1]
-        //         print(" inst: \(node.name)")
-        //         print("  arg: \(String(describing: node.arg))")
-        //         print("  src: \(line)")
-        //         print("   at: \(node.span)")
-        //     }
-        // }
-
         PC &+= 1
 
         switch opcode {
@@ -926,7 +906,7 @@ public struct CPU6502 {
             }
         }
     }
-    
+
     /**
      Allocates the program into CPU.
      - parameters:
