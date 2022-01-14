@@ -846,16 +846,16 @@ public struct CPU6502 {
                 PHA()
             }
         case 0x68:
-            cycled(2) {
-                PLA()
+            try cycled(2) {
+                try PLA()
             }
         case 0x08:
             cycled(3) {
                 PHP()
             }
         case 0x28:
-            cycled(4) {
-                PLP()
+            try cycled(4) {
+                try PLP()
             }
 
         case 0x86:

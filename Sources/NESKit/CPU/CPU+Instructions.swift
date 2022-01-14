@@ -491,14 +491,14 @@ public extension CPU6502 {
     }
 
     /**
-     Replaces register S(Stack pointer) to regiser X.
+     Replaces register S (Stack pointer) to regiser X.
      */
     mutating func TXS() {
         self[.S] = self[.X]
     }
 
     /**
-     Replaces register X to regiser S(Stack pointer).
+     Replaces register X to regiser S (Stack pointer).
      */
     mutating func TSX() {
         self[.X] = self[.S]
@@ -508,31 +508,28 @@ public extension CPU6502 {
      Pushes register A value to stack.
      */
     mutating func PHA() {
-        self[.S] -= 1
-        memory[Int(self[.S])] = self[.A]
+        pushStack(value: UInt16(self[.A]))
     }
 
     /**
      Pops the stack value to register A.
      */
-    mutating func PLA() {
-        self[.S] += 1
-        self[.A] = memory[Int(self[.S])]
+    mutating func PLA() throws {
+        self[.A] = UInt8(try popStack())
     }
 
     /**
      Pushes register P (status regiser) value to stack.
      */
     mutating func PHP() {
-        self[.S] -= 1
-        memory[Int(self[.S])] = self[.P]
+        pushStack(value: UInt16(self[.P] | StatusFlag.break1.rawValue | StatusFlag.break2.rawValue))
     }
 
     /**
      Pops the stack value to register P(Status regiser).
      */
-    mutating func PLP() {
-        self[.S] += 1
-        self[.P] = memory[Int(self[.P])]
+    mutating func PLP() throws {
+        let val = try popStack()
+        self[.P] = (UInt8(val) & ~StatusFlag.break1.rawValue) & ~StatusFlag.break2.rawValue
     }
 }
