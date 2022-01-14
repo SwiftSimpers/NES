@@ -232,7 +232,9 @@ final class CPUSnakeTest: XCTestCase {
         // try assembler.lex(source: asm)
         // try assembler.parse()
         // try assembler.assemble()
+
         var cpu = CPU6502()
+
         // cpu.nodes = assembler.nodes
         // for line in asm.split(separator: "\n") {
         //     cpu.sourceLines.append(String(line))
@@ -241,6 +243,23 @@ final class CPUSnakeTest: XCTestCase {
         // printHexDumpForBytes(bytes: snakeGame)
         // print("Assembled:")
         // printHexDumpForBytes(bytes: assembler.assembly!)
-        try cpu.loadAndRun(program: snakeGame)
+
+        cpu.load(program: snakeGame)
+
+        var steps = 0
+
+        cpu.reset()
+        loop: while true {
+            cpu[0xFE] = UInt8.random(in: 1 ..< 16)
+            cpu[0xFF] = 0x77
+
+            switch try cpu.step() {
+            case .ok:
+                steps += 1
+            case .interrupt:
+                steps += 1
+                break loop
+            }
+        }
     }
 }
