@@ -121,7 +121,7 @@ public struct CPU6502 {
             .A: 0,
             .X: 0,
             .Y: 0,
-            .S: 0xFF,
+            .S: 0xFD,
             .P: 0b0010_0100,
         ]
         PC = memory.readAllocU16(index: 0xFFFC)
@@ -133,9 +133,9 @@ public struct CPU6502 {
          - value: Value you want to push.
      */
     public mutating func pushStack(value: UInt16) {
-        self[.S] -= 2
         memory[Int(self[.S])] = UInt8(value &>> 8)
         memory[Int(self[.S]) &- 1] = UInt8(value & 0xFF)
+        self[.S] &-= 2
     }
 
     /**
@@ -143,6 +143,7 @@ public struct CPU6502 {
       - returns: Value popped from the stack.
      */
     public mutating func popStack() throws -> UInt16 {
+        self[.S] &+= 2
         if self[.S] == 0xFF {
             throw StackError.underflow
         } else if self[.S] == 0x00 {
@@ -150,7 +151,6 @@ public struct CPU6502 {
         }
         let low = UInt16(memory[Int(self[.S]) &- 1])
         let high = UInt16(memory[Int(self[.S])])
-        self[.S] += 2
         return high &<< 8 | low
     }
 
