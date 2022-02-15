@@ -51,7 +51,7 @@ final class CPUTests: XCTestCase {
     func testLDAFromMemory() throws {
         try test(
             { cpu in
-                cpu.memory[0x10] = 0x55
+                cpu.bus[0x10] = 0x55
             },
             """
             LDA 0x10
@@ -109,7 +109,7 @@ final class CPUTests: XCTestCase {
             """
         ) { cpu in
             XCTAssertEqual(cpu[.A], 0x05)
-            XCTAssertEqual(cpu.memory[0x10], 0x05)
+            XCTAssertEqual(cpu.bus[0x10], 0x05)
             XCTAssertFalse(cpu.getStatus(.zero))
             XCTAssertFalse(cpu.getStatus(.negative))
         }
@@ -141,7 +141,7 @@ final class CPUTests: XCTestCase {
     func testANDFromMemory() throws {
         try test(
             { cpu in
-                cpu.memory[0x10] = 0x05
+                cpu.bus[0x10] = 0x05
             },
             """
             LDA #0x10
@@ -297,14 +297,14 @@ final class CPUTests: XCTestCase {
                 ADC #0x01
                 BVC inflow
             overflow:
-                LDA #0xFF
+                LDA #0x60
                 BRK
             inflow:
-                LDA #0x60
+                LDA #0xFF
                 BRK
             """
         ) { cpu in
-            XCTAssertEqual(cpu[.A], 0xFF)
+            XCTAssertEqual(cpu[.A], 0x60)
         }
     }
 

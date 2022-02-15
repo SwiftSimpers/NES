@@ -35,10 +35,10 @@ public extension CPU6502 {
      */
     subscript(index: Int) -> UInt8 {
         get {
-            return memory[index]
+            return bus[index]
         }
         set(value) {
-            memory[index] = value
+            bus[index] = value
         }
     }
 
@@ -50,10 +50,10 @@ public extension CPU6502 {
      */
     subscript(index: UInt16) -> UInt8 {
         get {
-            return memory[Int(index)]
+            return bus[Int(index)]
         }
         set(value) {
-            memory[Int(index)] = value
+            bus[Int(index)] = value
         }
     }
 
@@ -65,25 +65,10 @@ public extension CPU6502 {
      */
     subscript(index: UInt8) -> UInt8 {
         get {
-            return memory[Int(index)]
+            return bus[Int(index)]
         }
         set(value) {
-            memory[Int(index)] = value
-        }
-    }
-
-    /**
-     Gets all allocated values in the provided range.
-     - parameters:
-        - bounds: Index range of the parts you want to get.
-     - returns: Allocated values in the parameter range.
-     */
-    subscript<R>(rangeExpression: R) -> Data where R: RangeExpression, R.Bound: FixedWidthInteger {
-        get {
-            return memory[rangeExpression]
-        }
-        set(value) {
-            memory[rangeExpression] = value
+            bus[Int(index)] = value
         }
     }
 
@@ -91,7 +76,7 @@ public extension CPU6502 {
         get {
             switch index {
             case let .memory(address):
-                return memory[address]
+                return bus[Int(address)]
             case let .register(key):
                 return registers[key] ?? 0
             }
@@ -99,7 +84,7 @@ public extension CPU6502 {
         set {
             switch index {
             case let .memory(address):
-                memory[address] = newValue
+                bus[Int(address)] = newValue
             case let .register(key):
                 registers[key] = newValue
             }

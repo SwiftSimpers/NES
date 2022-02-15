@@ -53,7 +53,7 @@ public extension Assembler6502 {
             guard let value = labels[name] else {
                 throw EmitterError.labelNotFound(name)
             }
-            self << (ProgramOffset + UInt16(value))
+            self << (0x8600 + UInt16(value))
         case .accumulator:
             break
         }

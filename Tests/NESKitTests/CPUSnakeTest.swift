@@ -259,7 +259,7 @@ final class CPUSnakeTest: XCTestCase {
             switch try cpu.step() {
             case .ok:
                 steps += 1
-            case .interrupt(let interrupt):
+            case .interrupt:
                 steps += 1
                 break loop
             }

@@ -40,7 +40,7 @@ public struct CPU6502 {
     }
 
     internal var registers: [Register: UInt8] = [:]
-    internal var memory: Memory = .init()
+    internal var bus: Bus = .init()
 
     var nodes: [Node] = []
     var sourceLines: [String] = []
@@ -62,11 +62,6 @@ public struct CPU6502 {
 
     public init() {}
 
-    /// Defines a new Memory Region.
-    public mutating func memory(region: MemoryRegion) {
-        memory.regions.append(region)
-    }
-
     internal mutating func getAddress(mode: AddressingModes) -> Address {
         switch mode {
         case .immidiate:
@@ -83,16 +78,16 @@ public struct CPU6502 {
             return .memory(UInt16(self[PC &- 1] &+ self[.Y]))
         case .abs:
             PC &+= 2
-            return .memory(memory.readAllocU16(index: PC &- 2))
+            return .memory(bus.read16(at: PC &- 2))
         case .absX:
             PC &+= 2
-            return .memory(memory.readAllocU16(index: PC &- 2) &+ UInt16(self[.X]))
+            return .memory(bus.read16(at: PC &- 2) &+ UInt16(self[.X]))
         case .absY:
             PC &+= 2
-            return .memory(memory.readAllocU16(index: PC &- 2) &+ UInt16(self[.Y]))
+            return .memory(bus.read16(at: PC &- 2) &+ UInt16(self[.Y]))
         case .indirect:
             PC &+= 2
-            return .memory(memory.readAllocU16(index: PC &- 2))
+            return .memory(bus.read16(at: PC &- 2))
         case .indirectX:
             PC &+= 1
             let base = self[PC &- 1]
@@ -130,7 +125,7 @@ public struct CPU6502 {
             .S: 0xFD,
             .P: 0b0010_0100,
         ]
-        PC = memory.readAllocU16(index: 0xFFFC)
+        PC = bus.read16(at: 0xFFFC)
     }
 
     /**
@@ -139,8 +134,8 @@ public struct CPU6502 {
          - value: Value you want to push.
      */
     public mutating func pushStack(value: UInt16) {
-        memory[Int(self[.S])] = UInt8(value &>> 8)
-        memory[Int(self[.S]) &- 1] = UInt8(value & 0xFF)
+        bus[Int(self[.S])] = UInt8(value &>> 8)
+        bus[Int(self[.S]) &- 1] = UInt8(value & 0xFF)
         self[.S] &-= 2
     }
 
@@ -155,8 +150,8 @@ public struct CPU6502 {
         } else if self[.S] == 0x00 {
             throw StackError.overflow
         }
-        let low = UInt16(memory[Int(self[.S]) &- 1])
-        let high = UInt16(memory[Int(self[.S])])
+        let low = UInt16(bus[Int(self[.S]) &- 1])
+        let high = UInt16(bus[Int(self[.S])])
         return high &<< 8 | low
     }
 
@@ -920,14 +915,28 @@ public struct CPU6502 {
         - program: Program code in 6502 machine language.
      */
     public mutating func load(program: [UInt8]) {
-        memory.load(program: program)
+        bus.cartridge = Cartridge(program: program)
+    }
+
+    /**
+     Allocates the program into CPU.
+     - parameters:
+        - rom: NES rom to execute.
+     */
+    public mutating func load(rom data: Data) throws {
+        bus.cartridge = try Cartridge.load(rom: data)
     }
 
     /**
      Allocates the program into CPU and executes the program.
      - parameters:
-        - program: Program code in 6502 machine language.
+        - rom: NES rom to execute.
      */
+    public mutating func loadAndRun(rom data: Data) throws {
+        try load(rom: data)
+        try run()
+    }
+
     public mutating func loadAndRun(program: [UInt8]) throws {
         load(program: program)
         try run()

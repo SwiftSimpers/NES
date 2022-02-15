@@ -124,7 +124,7 @@ public extension CPU6502 {
         updateStatus(carry: sum > 0xFF)
         let bytes = withUnsafeBytes(of: sum.littleEndian) { Data($0) }
         let result = bytes[0]
-        updateStatus(overflow: (value ^ result) & (result ^ self[.A]) & 0x80 != 0)
+        updateStatus(overflow: sum & 0xFF00 != 0)
         setRegisterA(result)
     }
 
@@ -449,7 +449,6 @@ public extension CPU6502 {
     mutating func LSR(mode: AddressingModes) {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
-        let carry = value & 1 == 1
         let result = value >> 1
         self[pointer] = result
         updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: value & 1 == 1)
