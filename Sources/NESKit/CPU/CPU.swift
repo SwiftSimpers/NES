@@ -245,6 +245,8 @@ public struct CPU6502 {
     public mutating func step() throws -> Status {
         let opcode = self[PC]
         PC &+= 1
+        // left for handy debugging
+        // print("op \(String(format: "%02X", opcode)) pc \(String(format: "%04X", PC)) status \(String(format: "%02X", registers[.P]!)) reg a \(String(format: "%02X", registers[.A]!)) reg x \(String(format: "%02X", registers[.X]!)) reg y \(String(format: "%02X", registers[.Y]!)) sp \(String(format: "%02X", registers[.S]!))")
 
         switch opcode {
         case 0x00:

@@ -114,6 +114,20 @@ public extension CPU6502 {
         self[pointer] = self[.Y]
     }
 
+    mutating func setRegisterA(_ value: UInt8) {
+        self[.A] = value
+        updateStatus(negative: value & 0x80 != 0, zero: value == 0)
+    }
+
+    mutating func addToRegisterA(_ value: UInt8) {
+        let sum = UInt16(self[.A]) &+ UInt16(value) &+ (getStatus(.carry) ? 1 : 0)
+        updateStatus(carry: sum > 0xFF)
+        let bytes = withUnsafeBytes(of: sum.littleEndian) { Data($0) }
+        let result = bytes[0]
+        updateStatus(overflow: (value ^ result) & (result ^ self[.A]) & 0x80 != 0)
+        setRegisterA(result)
+    }
+
     /**
      Adds the provided address value to register A value.
      - parameters:
@@ -122,9 +136,7 @@ public extension CPU6502 {
     mutating func ADC(mode: AddressingModes) {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
-        let original = self[.A]
-        self[.A] &+= value
-        updateStatus(overflow: original > self[.A], carry: original > self[.A])
+        addToRegisterA(value)
     }
 
     /**
@@ -134,10 +146,8 @@ public extension CPU6502 {
      */
     mutating func SBC(mode: AddressingModes) {
         let pointer = getAddress(mode: mode)
-        let value = self[pointer]
-        let original = self[.A]
-        self[.A] &-= value
-        updateStatus(overflow: original > self[.A], carry: original < self[.A])
+        let value = self[pointer] 
+        addToRegisterA(~value) // ohhhhh
     }
 
     /**
@@ -174,7 +184,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         let result = self[.A] & value
-        updateStatus(negative: value & 0x80 != 0, overflow: value & 0x40 != 0, zero: result == 0, carry: value & 0x01 != 0)
+        updateStatus(negative: value & 0x80 != 0, overflow: value & 0x40 != 0, zero: result == 0)
     }
 
     /**
@@ -266,7 +276,7 @@ public extension CPU6502 {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
         let result = self[.A] &- value
-        updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: result >= 0)
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: self[.A] >= value)
     }
 
     /**
@@ -439,9 +449,10 @@ public extension CPU6502 {
     mutating func LSR(mode: AddressingModes) {
         let pointer = getAddress(mode: mode)
         let value = self[pointer]
+        let carry = value & 1 == 1
         let result = value >> 1
-        self[.A] = result
-        updateStatus(carry: value & 0b1000_0000 != 0)
+        self[pointer] = result
+        updateStatus(negative: result & 0x80 != 0, zero: result == 0, carry: value & 1 == 1)
     }
 
     /**
